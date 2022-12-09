@@ -500,8 +500,8 @@ class IthyphalGame extends Program {
                 if(map.carte[i][j].isWall) {
                     print(ANSI_BOLD + ANSI_WHITE + "■" + ANSI_RESET);
                 } else if(map.carte[i][j].isExit) {
-                    if(map.carte[i][j].canExit) {
-                        print(ANSI_BOLD + ANSI_GREEN + "~" + ANSI_RESET);
+                    if(!map.carte[i][j].canExit) {
+                        print(ANSI_BOLD + ANSI_GREEN + "▩" + ANSI_RESET);
                     } else {
                         print(ANSI_BOLD + ANSI_RED + "▩" + ANSI_RESET);
                     }
