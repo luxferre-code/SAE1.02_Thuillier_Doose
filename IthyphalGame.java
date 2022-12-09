@@ -522,7 +522,167 @@ class IthyphalGame extends Program {
 
     /* End */
 
-    void algorithm() {
+    boolean canGoTo(Map map, int ligne, int colonne) {
+        /* Check if the player can go to the cell (ligne, colonne) */
+        if(ligne < 0 || colonne < 0 || ligne >= length(map.carte) || colonne >= length(map.carte[0])) {
+            return false;
+        }
+        return !map.carte[ligne][colonne].isWall && !map.carte[ligne][colonne].isExit;
+    }
+
+    void testCanGoTo() {
+        Map m = loadMap("debuggingMap.csv");
+        assertTrue(canGoTo(m, 1, 1));
+        assertTrue(canGoTo(m, 1, 3));
+        assertTrue(canGoTo(m, 2, 1));
+        assertTrue(canGoTo(m, 2, 3));
+        assertTrue(canGoTo(m, 3, 1));
+        assertTrue(canGoTo(m, 3, 3));
+        assertFalse(canGoTo(m, 0, 0));
+        assertFalse(canGoTo(m, 0, 1));
+        assertFalse(canGoTo(m, 0, 2));
+        assertFalse(canGoTo(m, 0, 3));
+        assertFalse(canGoTo(m, 0, 4));
+        assertFalse(canGoTo(m, 1, 0));
+        assertFalse(canGoTo(m, 1, 4));
+        assertFalse(canGoTo(m, 2, 0));
+        assertFalse(canGoTo(m, 2, 4));
+        assertFalse(canGoTo(m, 3, 0));
+        assertFalse(canGoTo(m, 3, 4));
+        assertFalse(canGoTo(m, 4, 0));
+        assertFalse(canGoTo(m, 4, 1));
+        assertFalse(canGoTo(m, 4, 2));
+        assertFalse(canGoTo(m, 4, 3));
+        assertFalse(canGoTo(m, 4, 4));
+    }
+
+    boolean isDirection(String direction) {
+        /* Check if the direction is valid */
+        return equals(direction, "z") || equals(direction, "s") || equals(direction, "q") || equals(direction, "d");
+    }
+
+    void testIsDirection() {
+        assertTrue(isDirection("z"));
+        assertTrue(isDirection("s"));
+        assertTrue(isDirection("q"));
+        assertTrue(isDirection("d"));
+        assertFalse(isDirection("a"));
+        assertFalse(isDirection("e"));
+        assertFalse(isDirection("r"));
+        assertFalse(isDirection("f"));
+        assertFalse(isDirection("w"));
+        assertFalse(isDirection("x"));
+        assertFalse(isDirection("c"));
+        assertFalse(isDirection("v"));
+        assertFalse(isDirection("b"));
+        assertFalse(isDirection("n"));
+        assertFalse(isDirection("m"));
+        assertFalse(isDirection("p"));
+        assertFalse(isDirection("o"));
+        assertFalse(isDirection("l"));
+        assertFalse(isDirection("k"));
+        assertFalse(isDirection("j"));
+        assertFalse(isDirection("i"));
+        assertFalse(isDirection("h"));
+        assertFalse(isDirection("g"));
+        assertFalse(isDirection("u"));
+        assertFalse(isDirection("y"));
+        assertFalse(isDirection("t"));
+        assertFalse(isDirection("1"));
+        assertFalse(isDirection("2"));
+        assertFalse(isDirection("3"));
+        assertFalse(isDirection("4"));
+        assertFalse(isDirection("5"));
+        assertFalse(isDirection("6"));
+        assertFalse(isDirection("7"));
+        assertFalse(isDirection("8"));
+        assertFalse(isDirection("9"));
+        assertFalse(isDirection("0"));
+        assertFalse(isDirection(" "));
+        assertFalse(isDirection("azerty"));
+        assertFalse(isDirection("qsdfgh"));
+        assertFalse(isDirection("wxcvbn"));
+        assertFalse(isDirection("azertyuiop"));
+        assertFalse(isDirection("qsdfghjklm"));
+        assertFalse(isDirection("wxcvbn,;:"));
+        assertFalse(isDirection("azertyuiopqsdfghjklmwxcvbn,;:"));
+        assertFalse(isDirection("qsdfghjklmazertyuiopwxcvbn,;:"));
+        assertFalse(isDirection("wxcvbn,;:azertyuiopqsdfghjklm"));
+        assertFalse(isDirection("azertyuiopqsdfghjklmwxcvbn,;:qsdfghjklmazertyuiopwxcvbn,;:"));
+        assertFalse(isDirection("qsdfghjklmazertyuiopwxcvbn,;:wxcvbn,;:azertyuiopqsdfghjklm"));
+        assertFalse(isDirection("wxcvbn,;:azertyuiopqsdfghjklmazertyuiopqsdfghjklmw\n"));
+    }
+
+    int[] getDirection(String direction, int ligne, int colonne) {
+        /* Return the direction in the form of an array */
+        int[] directionTo = new int[2];
+        if(equals(direction, "z")) {
+            directionTo[0] = ligne - 1;
+            directionTo[1] = colonne;
+        } else if(equals(direction, "s")) {
+            directionTo[0] = ligne + 1;
+            directionTo[1] = colonne;
+        } else if(equals(direction, "q")) {
+            directionTo[0] = ligne;
+            directionTo[1] = colonne - 1;
+        } else if(equals(direction, "d")) {
+            directionTo[0] = ligne;
+            directionTo[1] = colonne + 1;
+        }
+        return directionTo;
+    }
+
+    void testGetDirection() {
+        int[] direction = getDirection("z", 1, 1);
+        assertTrue(direction[0] == 0);
+        assertTrue(direction[1] == 1);
+        direction = getDirection("s", 1, 1);
+        assertTrue(direction[0] == 2);
+        assertTrue(direction[1] == 1);
+        direction = getDirection("q", 1, 1);
+        assertTrue(direction[0] == 1);
+        assertTrue(direction[1] == 0);
+        direction = getDirection("d", 1, 1);
+        assertTrue(direction[0] == 1);
+        assertTrue(direction[1] == 2);
+    }
+
+    boolean movePlayer(Map map, String direction) {
+        /* Move the player to the direction */
+        int ligne = map.lignePlayer;
+        int colonne = map.colonnePlayer;
+        ligne = getDirection(direction, ligne, colonne)[0];
+        colonne = getDirection(direction, ligne, colonne)[1];
+        if(canGoTo(map, ligne, colonne)) {
+            Player player = map.carte[map.lignePlayer][map.colonnePlayer].player;
+            map.carte[map.lignePlayer][map.colonnePlayer].player = null;
+            map.carte[ligne][colonne].player = player;
+            map.lignePlayer = ligne;
+            map.colonnePlayer = colonne;
+            return true;
+        }
+        return false;
+    }
+
+    boolean playerGoToMonster(Map map, String direction) {
+        /* Check if the player can go to the monster */
+        int ligne = map.lignePlayer;
+        int colonne = map.colonnePlayer;
+        ligne = getDirection(direction, ligne, colonne)[0];
+        colonne = getDirection(direction, ligne, colonne)[1];
+        return map.carte[ligne][colonne].monster != null;
+    }
+
+    boolean playerGoToLoot(Map map, String direction) {
+        /* Check if the player can go to the loot */
+        int ligne = map.lignePlayer;
+        int colonne = map.colonnePlayer;
+        ligne = getDirection(direction, ligne, colonne)[0];
+        colonne = getDirection(direction, ligne, colonne)[1];
+        return map.carte[ligne][colonne].loot != null;
+    }
+
+    void _algorithm() {
         // Main function
         afficherMap(loadMap("debuggingMap.csv"));
     }
