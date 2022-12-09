@@ -495,6 +495,8 @@ class IthyphalGame extends Program {
 
     void afficherMap(Map map) {
         /* Display the map */
+        clearScreen();
+        println();
         for(int i = 0; i < length(map.carte); i++) {
             for(int j = 0; j < length(map.carte[0]); j++) {
                 if(map.carte[i][j].isWall) {
@@ -682,8 +684,110 @@ class IthyphalGame extends Program {
         return map.carte[ligne][colonne].loot != null;
     }
 
-    void _algorithm() {
+    void welcomeMessage() {
+        print("Bienvenue dans");
+        for(int i = 0; i < 5; i++) {
+            print(".");
+            delay(500);
+        }
+        println(ANSI_BOLD + "IthyphalGame !" + ANSI_RESET);
+
+        println("Vous êtes piéger dans le donjon d'Ithyphal, vous devez trouver la sortie pour vous en échapper.");
+        delay(2000);
+        println("Mais faites attention, vous ne serez pas seul dans ce donjon ! Des monstres sont la pour vous empêcher de sortir.");
+        delay(2000);
+        println("Vous pouvez vous déplacer avec les touches Z, Q, S et D.");
+        delay(2000);
+        println("Bonne chance jeune aventurier !");
+        print("Appuyez sur entrer pour continuer...");
+        readString();
+    }
+
+    int menuPrincipal() {
+        clearScreen();
+        for(int i = 0; i < length("IthyphalGame"); i++) {
+            text(randomANSIColor());
+            print(charAt("IthyphalGame", i));
+        }
+        println(ANSI_RESET + "\n");
+
+
+        println("1. Nouvelle partie");
+        println("2. Charger une partie");
+        println("3. Quitter");
+        print("Votre choix : ");
+        return readInt();
+    }
+
+    Map[][] generateMap() {
+        Map[][] carte = new Map[5][5];
+        for(int i = 0; i < 5; i++) {
+            for(int j = 0; j < 5; j++) {
+                carte[i][j] = loadMap("map" + i + j + ".csv");
+            }
+        }
+        return carte;
+    }
+
+    // Algorithm principal
+
+    void algorithm() {
         // Main function
-        afficherMap(loadMap("debuggingMap.csv"));
+        int ligne = 0;
+        int colonne = 0;
+        boolean fini = false;
+        welcomeMessage();
+        int choix = menuPrincipal();
+        if(choix == 1) { // Start new game
+            print("Chargement de la carte");
+            Map[][] carte = generateMap();
+            for(int i = 0; i < 5; i++) {
+                print(".");
+                delay(500);
+            }
+            
+            int player_x = 1;
+            int player_y = 1;
+
+            // Start game
+
+            while(!fini && carte[ligne][colonne].carte[player_x][player_y].player.healt > 0) {
+                clearScreen();
+                afficherMap(carte[ligne][colonne]);
+                print("Votre choix : ");
+                String direction = readString();
+                if(equals(direction, "z") || equals(direction, "s") || equals(direction, "q") || equals(direction, "d")) {
+                    if(movePlayer(carte[ligne][colonne], direction)) {
+                        player_x = carte[ligne][colonne].lignePlayer;
+                        player_y = carte[ligne][colonne].colonnePlayer;
+                        println("player_x = " + player_x + " player_y = " + player_y + "");
+                        if(playerGoToMonster(carte[ligne][colonne], direction)) {
+                            //TODO : Fight
+                        } else if(playerGoToLoot(carte[ligne][colonne], direction)) {
+                            //TODO : Loot
+                        } else {
+                            println("Vous avez avancé !");
+                            delay(100);
+                        }
+                    } else {
+                        println("Vous ne pouvez pas aller dans cette direction !");
+                        delay(1000);
+                    }
+                } else {
+                    println("Erreur : Veuillez entrer une direction valide");
+                    delay(1000);
+                }
+            }
+
+        } else if(choix == 2) { // Load game
+
+        } else if(choix == 3) { // Quit game
+            println("Merci d'avoir joué !");
+            delay(1000);
+        } else { // Error
+            println("Erreur : Veuillez entrer un nombre entre 1 et 3");
+            delay(1000);
+            algorithm();
+        }
     }
 }
