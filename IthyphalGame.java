@@ -20,6 +20,11 @@ class IthyphalGame extends Program {
 
     final double ARMOR_SPAWN_PROBA = 0.33;
 
+    // QUESTION
+
+    final String[] FILESQUESTION = new String[]{"init_question.csv"};
+    String[][] QUESTIONS = loadQuestionFile(FILESQUESTION[0]);
+
 
     Player newPlayer(String nom) {
         /* Constructor of class PLAYER */
@@ -729,6 +734,54 @@ class IthyphalGame extends Program {
         return carte;
     }
 
+    String attack(Player p, Monster m) {
+        // Return: "player" if the player lost, "monster" if the monster lost.
+        while(p.healt > 0 || m.healt > 0) {
+            println("Quelles attaques voulez-vous faire ?");
+            println("1. IJava (Attaque basique qui inflige " + p.attack + " dégats)");
+            println("2. Java (Attaque spécial qui inflige " + (int) (p.attack * 1.5) + " dégats)");
+            println("3. Python (Attaque spécial qui inflige " + p.attack * 2 + " dégats)");
+
+            print("Votre choix : ");
+            int choix;
+            do {
+                choix = readInt();
+            } while(choix < 1 || choix > 3);
+
+            if(choix == 1) {
+                m.healt -= p.attack;
+            } else if(choix == 2) {
+                // 1 question
+                m.healt -= (int) (p.attack * 1.5);
+            } else if(choix == 3) {
+                // 3 questions
+                m.healt -= p.attack * 2;
+            }
+        }
+        if(p.healt <= 0) {
+            return "player";
+        } else {
+            return "monster";
+        }
+    }
+
+    // Ask function
+
+    String[][] loadQuestionFile(String filename) {
+        extensions.CSVFile csv = loadCSV("./questions/" + filename);
+        String[][] data = new String[rowCount(csv) - 1][columnCount(csv)];
+        println(rowCount(csv) + " " + columnCount(csv));
+        for(int i = 1; i < rowCount(csv); i++) {
+            for(int j = 0; j < columnCount(csv); j++) {
+                data[i][j] = csv.getCell(i, j);
+                println(data[i][j] + "|" + i + "|" + j);
+            }
+        }
+        return data;
+    }
+
+
+
     // Algorithm principal
 
     void algorithm() {
@@ -738,6 +791,7 @@ class IthyphalGame extends Program {
         boolean fini = false;
         welcomeMessage();
         int choix = menuPrincipal();
+        QUESTIONS = loadQuestionFile("init_question.csv");
         if(choix == 1) { // Start new game
             print("Chargement de la carte");
             Map[][] carte = generateMap();
@@ -757,14 +811,17 @@ class IthyphalGame extends Program {
                 print("Votre choix : ");
                 String direction = readString();
                 if(equals(direction, "z") || equals(direction, "s") || equals(direction, "q") || equals(direction, "d")) {
-                    if(movePlayer(carte[ligne][colonne], direction)) {
+                    if(movePlayer(carte[ligne][colonne], direction)) { // check this line !
                         player_x = carte[ligne][colonne].lignePlayer;
                         player_y = carte[ligne][colonne].colonnePlayer;
                         println("player_x = " + player_x + " player_y = " + player_y + "");
                         if(playerGoToMonster(carte[ligne][colonne], direction)) {
-                            //TODO : Fight
+                            String[] asked = QUESTIONS[(int) (random() * length(QUESTIONS))];
+
+                            //while()
+
                         } else if(playerGoToLoot(carte[ligne][colonne], direction)) {
-                            //TODO : Loot
+                            
                         } else {
                             println("Vous avez avancé !");
                             delay(100);
