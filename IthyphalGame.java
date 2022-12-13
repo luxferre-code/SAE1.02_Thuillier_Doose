@@ -1,4 +1,8 @@
+import extensions.*;
+
 class IthyphalGame extends Program {
+
+    int DIMENSION = 0;
 
     // MONSTER VARIABLES
     final double ZOMBIE_SPAWN_PROBA = 0.5;
@@ -23,7 +27,7 @@ class IthyphalGame extends Program {
     // QUESTION
 
     final String[] FILESQUESTION = new String[]{"init_question.csv"};
-    String[][] QUESTIONS = loadQuestionFile(FILESQUESTION[0]);
+    Question[] QUESTIONS = loadAllQuestions(loadQuestionFile(FILESQUESTION[0]));
 
 
     Player newPlayer(String nom) {
@@ -452,6 +456,10 @@ class IthyphalGame extends Program {
                     map.carte[i][j] = newCellulePlayer(newPlayer("Not defined"));
                     map.lignePlayer = i;
                     map.colonnePlayer = j;
+                    DIMENSION = charAt(filename, 3) - '0';
+                    println("DIMENSION = " + DIMENSION);
+                    println("map.lignePlayer = " + map.lignePlayer);
+                    println("map.colonnePlayer = " + map.colonnePlayer);
                 } else if(equals(s, "M")) { // Monster case
                     map.carte[i][j] = newCelluleMonster(newMonsterRandom());
                 } else if(equals(s, "L")) { // Loot case
@@ -519,7 +527,7 @@ class IthyphalGame extends Program {
                 } else if(map.carte[i][j].loot != null) {
                     print(ANSI_BOLD + ANSI_YELLOW + "♦" + ANSI_RESET);
                 } else {
-                    print(ANSI_BOLD + ANSI_BLACK + "▩" + ANSI_RESET);
+                    print(" ");
                 }
                 print(" ");
             }
@@ -671,6 +679,15 @@ class IthyphalGame extends Program {
         return false;
     }
 
+    boolean playerGoToDoor(Map map, String direction) {
+        /* Check if the player can go to the door */
+        int ligne = map.lignePlayer;
+        int colonne = map.colonnePlayer;
+        ligne = getDirection(direction, ligne, colonne)[0];
+        colonne = getDirection(direction, ligne, colonne)[1];
+        return map.carte[ligne][colonne].isExit && map.carte[ligne][colonne].canExit;
+    }
+
     boolean playerGoToMonster(Map map, String direction) {
         /* Check if the player can go to the monster */
         int ligne = map.lignePlayer;
@@ -724,15 +741,18 @@ class IthyphalGame extends Program {
         return readInt();
     }
 
-    Map[][] generateMap() {
-        Map[][] carte = new Map[5][5];
-        for(int i = 0; i < 5; i++) {
-            for(int j = 0; j < 5; j++) {
-                carte[i][j] = loadMap("map" + i + j + ".csv");
+    Map[][][] generateMap() {
+        Map[][][] carte = new Map[5][5][5];
+        for(int dim = 0; dim < 5; dim++) {
+            for(int i = 0; i < 5; i++) {
+                for(int j = 0; j < 5; j++) {
+                    carte[dim][i][j] = loadMap("map" + dim + i + j + ".csv");
             }
+        }
         }
         return carte;
     }
+
 
     String attack(Player p, Monster m) {
         // Return: "player" if the player lost, "monster" if the monster lost.
@@ -751,7 +771,7 @@ class IthyphalGame extends Program {
             if(choix == 1) {
                 m.healt -= p.attack;
             } else if(choix == 2) {
-                // 1 question
+                
                 m.healt -= (int) (p.attack * 1.5);
             } else if(choix == 3) {
                 // 3 questions
@@ -768,20 +788,92 @@ class IthyphalGame extends Program {
     // Ask function
 
     String[][] loadQuestionFile(String filename) {
-        extensions.CSVFile csv = loadCSV("./questions/" + filename);
-        String[][] data = new String[rowCount(csv) - 1][columnCount(csv)];
-        println(rowCount(csv) + " " + columnCount(csv));
-        for(int i = 1; i < rowCount(csv); i++) {
-            for(int j = 0; j < columnCount(csv); j++) {
-                data[i][j] = csv.getCell(i, j);
-                println(data[i][j] + "|" + i + "|" + j);
+        CSVFile file = loadCSV("./questions/" + filename);
+        String[][] questions = new String[rowCount(file)][columnCount(file)];
+        for(int ligne = 1; ligne < length(questions); ligne++) {
+            for(int colonne = 0; colonne < length(questions[0]); colonne++) {
+                questions[ligne][colonne] = getCell(file, ligne, colonne);
             }
         }
-        return data;
+        return questions;
     }
 
+    Question newQuestion(String question, String bonne_rep, String[] bad_responses) {
+        Question q = new Question();
+        q.question = question;
+        q.bonne_rep = bonne_rep;
+        q.bad_responses = bad_responses;
+        return q;
+    }
 
+    void testNewQuestion() {
+        String[] bad_responses = {"Réponse 1", "Réponse 2", "Réponse 3"};
+        Question q = newQuestion("Question 1", "Réponse 4", bad_responses);
+        assertArrayEquals(q.bad_responses, bad_responses);
+        assertEquals(q.question, "Question 1");
+        assertEquals(q.bonne_rep, "Réponse 4");
+    }
 
+    Question[] loadAllQuestions(String[][] tabQuestions) {
+        Question[] questions = new Question[length(tabQuestions)];
+        for(int i = 1; i < length(tabQuestions); i++) {
+            String[] bad_responses = new String[3];
+            for(int j = 0; j < 3; j++) {
+                bad_responses[j] = tabQuestions[i][j + 2];
+            }
+            questions[i] = newQuestion(tabQuestions[i][0], tabQuestions[i][1], bad_responses);
+        }
+        return questions;
+    }
+
+    Question getRandomQuestion() {
+        // QUESTIONS
+        int rdm;
+        boolean find = false;
+        while(!find) {
+            rdm = (int) (1 + random() * (length(QUESTIONS) - 1));
+            if(!QUESTIONS[rdm].dejaPosee) {
+                QUESTIONS[rdm].dejaPosee = true;
+                return QUESTIONS[rdm];
+            }
+        }
+        return null;
+    }
+
+    void randomiseTab(String[] tab) {
+        for(int i = 0; i < length(tab); i++) {
+            int random = (int) (random() * length(tab));
+            String tmp = tab[i];
+            tab[i] = tab[random];
+            tab[random] = tmp;
+        }
+    }
+
+    void askQuestion(int nbrToAsk) {
+        for(int i = 0; i < nbrToAsk; i++) {
+            Question q = getRandomQuestion();
+            String[] tab = new String[4];
+            tab[0] = q.bonne_rep;
+            tab[1] = q.bad_responses[0];
+            tab[2] = q.bad_responses[1];
+            tab[3] = q.bad_responses[2];
+            randomiseTab(tab);
+            println(ANSI_BOLD + "Question: " + q.question + ANSI_RESET);
+            for(int j = 0; j < length(tab); j++) {
+                println("->     " + (j + 1) + ". " + tab[j]);
+            }
+            print("Votre choix : ");
+            int choix;
+            do {
+                choix = readInt();
+            } while(choix < 1 || choix > 4);
+            if(equals(tab[choix - 1], q.bonne_rep)) {
+                println(ANSI_GREEN + ANSI_BOLD + "Bonne réponse !" + ANSI_RESET);
+            } else {
+                println(ANSI_RED + ANSI_BOLD + "Mauvaise réponse !" + ANSI_RESET);
+            }
+        }
+    }
     // Algorithm principal
 
     void algorithm() {
@@ -791,37 +883,44 @@ class IthyphalGame extends Program {
         boolean fini = false;
         welcomeMessage();
         int choix = menuPrincipal();
-        QUESTIONS = loadQuestionFile("init_question.csv");
         if(choix == 1) { // Start new game
             print("Chargement de la carte");
-            Map[][] carte = generateMap();
+            Map[][][] carte = generateMap();
             for(int i = 0; i < 5; i++) {
                 print(".");
                 delay(500);
             }
             
-            int player_x = 1;
-            int player_y = 1;
+            int player_x = carte[DIMENSION][ligne][colonne].colonnePlayer;
+            int player_y = carte[DIMENSION][ligne][colonne].lignePlayer;
 
             // Start game
 
-            while(!fini && carte[ligne][colonne].carte[player_x][player_y].player.healt > 0) {
+            // TEST AREA
+            println(DIMENSION + " " + ligne + " " + colonne);
+            println(length(carte[DIMENSION][ligne][colonne].carte));
+            println(player_x + " " + player_y);
+            afficherMap(carte[DIMENSION][ligne][colonne]);
+            // END TEST AREA
+
+            while(!fini && carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player.healt > 0) {
                 clearScreen();
-                afficherMap(carte[ligne][colonne]);
+                afficherMap(carte[DIMENSION][ligne][colonne]);
                 print("Votre choix : ");
                 String direction = readString();
                 if(equals(direction, "z") || equals(direction, "s") || equals(direction, "q") || equals(direction, "d")) {
-                    if(movePlayer(carte[ligne][colonne], direction)) { // check this line !
-                        player_x = carte[ligne][colonne].lignePlayer;
-                        player_y = carte[ligne][colonne].colonnePlayer;
+                    if(movePlayer(carte[DIMENSION][ligne][colonne], direction)) { // check this line !
+                        player_x = carte[DIMENSION][ligne][colonne].lignePlayer;
+                        player_y = carte[DIMENSION][ligne][colonne].colonnePlayer;
                         println("player_x = " + player_x + " player_y = " + player_y + "");
-                        if(playerGoToMonster(carte[ligne][colonne], direction)) {
-                            String[] asked = QUESTIONS[(int) (random() * length(QUESTIONS))];
+                        if(playerGoToMonster(carte[DIMENSION][ligne][colonne], direction)) {
 
                             //while()
 
-                        } else if(playerGoToLoot(carte[ligne][colonne], direction)) {
+                        } else if(playerGoToLoot(carte[DIMENSION][ligne][colonne], direction)) {
                             
+                        } else if(playerGoToDoor(carte[DIMENSION][ligne][colonne], direction)) {
+                        
                         } else {
                             println("Vous avez avancé !");
                             delay(100);
