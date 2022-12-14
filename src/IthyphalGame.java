@@ -945,6 +945,30 @@ class IthyphalGame extends Program {
         return newPos;
     }
 
+    boolean monsterInCarte(Cellule[][] carte) {
+        for(int i = 0; i < length(carte); i++) {
+            for(int j = 0; j < length(carte[0]); j++) {
+                if(carte[i][j].monster != null) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    void updatePorte(Map[][][] map, int ligne, int colonne, int etage) {
+        Cellule[][] carte = map[etage][ligne][colonne].carte;
+        if(!monsterInCarte(carte)) {
+            for(int i = 0; i < length(carte); i++) {
+                for(int j = 0; j < length(carte[0]); j++) {
+                    if(carte[i][j].isExit) {
+                        carte[i][j].canExit = true;
+                    }
+                }
+            }
+        } 
+    }
+
     void helpCommand() {
         println("Vous êtes sur la page d'aide du jeu");
         println("Voici la liste des touches disponibles dans le jeu: ");
@@ -955,7 +979,7 @@ class IthyphalGame extends Program {
         println("    - H : Afficher l'aide");
         println("    - I : Afficher les informations du joueur");
         println("    - X : Quitter le jeu");
-        println("Nous vous rappellons que pour passer à une autre pièce du donjon, il faut avoir battu tous les monstres présents dans la pièce actuelle.");
+        println("Nous vous rappellons que pour passer à une autre pièce du donjon, il faut canExitavoir battu tous les monstres présents dans la pièce actuelle.");
         println("Bonne chance !");
         print("Appuyez sur une entrée pour revenir au jeu");
         readString();
@@ -1012,6 +1036,7 @@ class IthyphalGame extends Program {
                             println("Vous avez gagné !");
                             delay(1000);
                             carte[DIMENSION][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].monster = null;
+                            updatePorte(carte, ligne, colonne, DIMENSION);
                         } else {
                             println("Vous avez perdu !");
                             delay(1000);
@@ -1070,6 +1095,7 @@ class IthyphalGame extends Program {
                             Monster m = newMonsterRandom();
                             String winner = attack(carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player, m);
                             if(equals(winner, "player")) {
+                                updatePorte(carte, ligne, colonne, DIMENSION);
                                 println("Vous avez gagné !");
                                 delay(1000);
                             } else {
@@ -1096,6 +1122,7 @@ class IthyphalGame extends Program {
                         carte[DIMENSION][ligne][colonne].lignePlayer = player_x;
                         carte[DIMENSION][ligne][colonne].colonnePlayer = player_y;
                         changementPiece = true;
+                        updatePorte(carte, ligne, colonne, DIMENSION);
                     }
                 } else {
                     println("Vous avez avancé !");
