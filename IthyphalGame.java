@@ -539,10 +539,10 @@ class IthyphalGame extends Program {
 
     boolean canGoTo(Map map, int ligne, int colonne) {
         /* Check if the player can go to the cell (ligne, colonne) */
-        if(ligne < 0 || colonne < 0 || ligne >= length(map.carte) || colonne >= length(map.carte[0])) {
+        if(ligne < 0 || colonne < 0 || ligne >= length(map.carte) || colonne >= length(map.carte[0]) || map.carte[ligne][colonne].isWall) {
             return false;
         }
-        return !map.carte[ligne][colonne].isWall && !map.carte[ligne][colonne].isExit;
+        return !map.carte[ligne][colonne].isWall || (map.carte[ligne][colonne].isExit && map.carte[ligne][colonne].canExit);
     }
 
     void testCanGoTo() {
@@ -756,7 +756,10 @@ class IthyphalGame extends Program {
 
     String attack(Player p, Monster m) {
         // Return: "player" if the player lost, "monster" if the monster lost.
-        while(p.healt > 0 || m.healt > 0) {
+        while(p.healt > 0 && m.healt > 0) {
+            println("Vous avez " + getHealt(p) + " points de vie.");
+            println("Le monstre a " + getHealt(m) + " points de vie.\n\n");
+
             println("Quelles attaques voulez-vous faire ?");
             println("1. IJava (Attaque basique qui inflige " + p.attack + " dégats)");
             println("2. Java (Attaque spécial qui inflige " + (int) (p.attack * 1.5) + " dégats)");
@@ -771,17 +774,30 @@ class IthyphalGame extends Program {
             if(choix == 1) {
                 m.healt -= p.attack;
             } else if(choix == 2) {
-                
-                m.healt -= (int) (p.attack * 1.5);
+                if(askQuestion(1)) {
+                    m.healt -= (int) (p.attack * 1.5);
+                }
             } else if(choix == 3) {
-                // 3 questions
-                m.healt -= p.attack * 2;
+                if(askQuestion(3)) {
+                    m.healt -= p.attack * 2;
+                }
             }
+
+            // Monster attack
+            if(m.healt > 0) {
+                if(random() < 0.5) {
+                    p.healt -= m.attack;
+                    println("Le monstre vous a infligé " + m.attack + " dégats !");
+                } else {
+                    println("Le monstre a raté son attaque !");
+                }
+            }
+            delay(1000);
         }
         if(p.healt <= 0) {
-            return "player";
-        } else {
             return "monster";
+        } else {
+            return "player";
         }
     }
 
@@ -849,7 +865,7 @@ class IthyphalGame extends Program {
         }
     }
 
-    void askQuestion(int nbrToAsk) {
+    boolean askQuestion(int nbrToAsk) {
         for(int i = 0; i < nbrToAsk; i++) {
             Question q = getRandomQuestion();
             String[] tab = new String[4];
@@ -862,6 +878,7 @@ class IthyphalGame extends Program {
             for(int j = 0; j < length(tab); j++) {
                 println("->     " + (j + 1) + ". " + tab[j]);
             }
+            println("Vous avez 60 secondes pour répondre !");
             print("Votre choix : ");
             int choix;
             do {
@@ -871,9 +888,12 @@ class IthyphalGame extends Program {
                 println(ANSI_GREEN + ANSI_BOLD + "Bonne réponse !" + ANSI_RESET);
             } else {
                 println(ANSI_RED + ANSI_BOLD + "Mauvaise réponse !" + ANSI_RESET);
+                return false;
             }
         }
+        return true;
     }
+
     // Algorithm principal
 
     void algorithm() {
@@ -909,24 +929,43 @@ class IthyphalGame extends Program {
                 print("Votre choix : ");
                 String direction = readString();
                 if(equals(direction, "z") || equals(direction, "s") || equals(direction, "q") || equals(direction, "d")) {
-                    if(movePlayer(carte[DIMENSION][ligne][colonne], direction)) { // check this line !
+                    println("player_x = " + player_x + " player_y = " + player_y + "");
+                    int[] coordonnees_prochaine = getDirection(direction, player_x, player_y);
+                    if(playerGoToMonster(carte[DIMENSION][ligne][colonne], direction)) {
+                        Monster m = carte[DIMENSION][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].monster;
+                        if(m != null) {
+                            println("Vous avez attaqué par un " + m.type + " !");
+                            delay(1000);
+                            String winner = attack(carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player, m);
+                            if(equals(winner, "player")) {
+                                println("Vous avez gagné !");
+                                delay(1000);
+                                carte[DIMENSION][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].monster = null;
+                            } else {
+                                println("Vous avez perdu !");
+                                delay(1000);
+                                carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player.healt = 0;
+                            }
+                        } else {
+                            println("Erreur : Vous avez attaqué un monstre qui n'existe pas !");
+                            println("Coordonnées : " + player_x + " " + player_y + "");
+                            delay(1000);
+                        }
+
+                    } else if(playerGoToLoot(carte[DIMENSION][ligne][colonne], direction)) {
+                        println("Vous avez trouvé un coffre !");
+                    } else if(playerGoToDoor(carte[DIMENSION][ligne][colonne], direction)) {
+                        println("Vous avez trouvé une porte !");
+                    } else {
+                        println("Vous avez avancé !");
+                        delay(100);
+                    }
+
+                    if(movePlayer(carte[DIMENSION][ligne][colonne], direction)) {
                         player_x = carte[DIMENSION][ligne][colonne].lignePlayer;
                         player_y = carte[DIMENSION][ligne][colonne].colonnePlayer;
-                        println("player_x = " + player_x + " player_y = " + player_y + "");
-                        if(playerGoToMonster(carte[DIMENSION][ligne][colonne], direction)) {
-
-                            //while()
-
-                        } else if(playerGoToLoot(carte[DIMENSION][ligne][colonne], direction)) {
-                            
-                        } else if(playerGoToDoor(carte[DIMENSION][ligne][colonne], direction)) {
-                        
-                        } else {
-                            println("Vous avez avancé !");
-                            delay(100);
-                        }
                     } else {
-                        println("Vous ne pouvez pas aller dans cette direction !");
+                        println("Erreur : Vous ne pouvez pas aller dans cette direction !");
                         delay(1000);
                     }
                 } else {
