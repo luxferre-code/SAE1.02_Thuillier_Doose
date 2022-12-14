@@ -718,7 +718,7 @@ class IthyphalGame extends Program {
         delay(2000);
         println("Mais faites attention, vous ne serez pas seul dans ce donjon ! Des monstres sont la pour vous empêcher de sortir.");
         delay(2000);
-        println("Vous pouvez vous déplacer avec les touches Z, Q, S et D.");
+        println("Vous pouvez vous déplacer avec les touches Z, Q, S et D. Et la touche H pour afficher l'aide.");
         delay(2000);
         println("Bonne chance jeune aventurier !");
         print("Appuyez sur entrer pour continuer...");
@@ -848,6 +848,7 @@ class IthyphalGame extends Program {
         boolean find = false;
         while(!find) {
             rdm = (int) (1 + random() * (length(QUESTIONS) - 1));
+            println(rdm);
             if(!QUESTIONS[rdm].dejaPosee) {
                 QUESTIONS[rdm].dejaPosee = true;
                 return QUESTIONS[rdm];
@@ -894,6 +895,22 @@ class IthyphalGame extends Program {
         return true;
     }
 
+    void helpCommand() {
+        println("Vous êtes sur la page d'aide du jeu");
+        println("Voici la liste des touches disponibles dans le jeu: ");
+        println("    - Z : Déplacement vers le haut");
+        println("    - Q : Déplacement vers la gauche");
+        println("    - S : Déplacement vers le bas");
+        println("    - D : Déplacement vers la droite");
+        println("    - H : Afficher l'aide");
+        println("    - I : Afficher les informations du joueur");
+        println("    - X : Quitter le jeu");
+        println("Nous vous rappellons que pour passer à une autre pièce du donjon, il faut avoir battu tous les monstres présents dans la pièce actuelle.");
+        println("Bonne chance !");
+        print("Appuyez sur une entrée pour revenir au jeu");
+        readString();
+    }
+
     // Algorithm principal
 
     void algorithm() {
@@ -916,12 +933,6 @@ class IthyphalGame extends Program {
 
             // Start game
 
-            // TEST AREA
-            println(DIMENSION + " " + ligne + " " + colonne);
-            println(length(carte[DIMENSION][ligne][colonne].carte));
-            println(player_x + " " + player_y);
-            afficherMap(carte[DIMENSION][ligne][colonne]);
-            // END TEST AREA
 
             while(!fini && carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player.healt > 0) {
                 clearScreen();
@@ -929,9 +940,8 @@ class IthyphalGame extends Program {
                 print("Votre choix : ");
                 String direction = readString();
                 if(equals(direction, "z") || equals(direction, "s") || equals(direction, "q") || equals(direction, "d")) {
-                    println("player_x = " + player_x + " player_y = " + player_y + "");
                     int[] coordonnees_prochaine = getDirection(direction, player_x, player_y);
-                    if(playerGoToMonster(carte[DIMENSION][ligne][colonne], direction)) {
+                    if(playerGoToMonster(carte[DIMENSION][ligne][colonne], direction)) { // Fini
                         Monster m = carte[DIMENSION][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].monster;
                         if(m != null) {
                             println("Vous avez attaqué par un " + m.type + " !");
@@ -953,7 +963,65 @@ class IthyphalGame extends Program {
                         }
 
                     } else if(playerGoToLoot(carte[DIMENSION][ligne][colonne], direction)) {
-                        println("Vous avez trouvé un coffre !");
+                        
+                        Loot l = carte[DIMENSION][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].loot;
+                        if(l == null) {
+                            println("Erreur : Vous avez trouvé un loot qui n'existe pas !");
+                            println("Coordonnées : " + player_x + " " + player_y + "");
+                            delay(5000);
+                        }
+
+                        TypeLoot type = l.type;
+                        int amount = l.amount;
+
+                        String choix_loot;
+                        do {
+                            println("Vous avez trouvé un loot !");
+                            println("->     1. Prendre le loot");
+                            println("->     2. Ne pas prendre le loot");
+                            print("Votre choix : ");
+                            choix_loot = readString();
+                        } while(!equals(choix_loot, "1") && !equals(choix_loot, "2"));
+
+                        if(equals(choix_loot, "1")) {
+                            if(askQuestion(1)) {
+                                println("Vous avez pris le loot !");
+                                delay(1000);
+                                if(type == TypeLoot.POTION) {
+                                    carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player.healt += amount;
+                                    println("Vous avez gagné " + amount + " points de vie !");
+                                    delay(1000);
+                                } else if(type == TypeLoot.RING) {
+                                    carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player.attack += amount;
+                                    println("Vous avez gagné " + amount + " points d'attaque !");
+                                    delay(1000);
+                                } else if(type == TypeLoot.ARMOR) {
+                                    carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player.shield += amount;
+                                    println("Vous avez gagné " + amount + " points de défense !");
+                                    delay(1000);
+                                }
+                            } else {
+                                println("Vous avez perdu le loot !");
+                                carte[DIMENSION][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].loot = null;
+                                delay(1000);
+                                println("Un monstre vous a attaqué !");
+                                delay(1000);
+                                Monster m = newMonsterRandom();
+                                String winner = attack(carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player, m);
+                                if(equals(winner, "player")) {
+                                    println("Vous avez gagné !");
+                                    delay(1000);
+                                } else {
+                                    println("Vous avez perdu !");
+                                    delay(1000);
+                                    carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player.healt = 0;
+                                }
+                            }
+                        } else {
+                            println("Vous avez décidé de ne pas prendre le loot ! Il a disparu !");
+                            delay(1000);
+                        }
+                        carte[DIMENSION][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].loot = null;
                     } else if(playerGoToDoor(carte[DIMENSION][ligne][colonne], direction)) {
                         println("Vous avez trouvé une porte !");
                     } else {
@@ -968,6 +1036,12 @@ class IthyphalGame extends Program {
                         println("Erreur : Vous ne pouvez pas aller dans cette direction !");
                         delay(1000);
                     }
+                } else if(equals(direction, "h")) {
+                    helpCommand();
+                } else if(equals(direction, "x")) {
+                    println("Vous avez quitté le jeu !");
+                    delay(1000);
+                    //TODO : Save game
                 } else {
                     println("Erreur : Veuillez entrer une direction valide");
                     delay(1000);
