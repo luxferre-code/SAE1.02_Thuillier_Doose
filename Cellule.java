@@ -4,5 +4,5 @@ class Cellule {
     Loot loot = null;
     boolean isWall = false;
     boolean isExit = false;
-    boolean canExit = false;
+    boolean canExit = true;
 }

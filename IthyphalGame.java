@@ -515,7 +515,7 @@ class IthyphalGame extends Program {
                 if(map.carte[i][j].isWall) {
                     print(ANSI_BOLD + ANSI_WHITE + "■" + ANSI_RESET);
                 } else if(map.carte[i][j].isExit) {
-                    if(!map.carte[i][j].canExit) {
+                    if(map.carte[i][j].canExit) {
                         print(ANSI_BOLD + ANSI_GREEN + "▩" + ANSI_RESET);
                     } else {
                         print(ANSI_BOLD + ANSI_RED + "▩" + ANSI_RESET);
@@ -539,10 +539,13 @@ class IthyphalGame extends Program {
 
     boolean canGoTo(Map map, int ligne, int colonne) {
         /* Check if the player can go to the cell (ligne, colonne) */
-        if(ligne < 0 || colonne < 0 || ligne >= length(map.carte) || colonne >= length(map.carte[0]) || map.carte[ligne][colonne].isWall) {
+        if(ligne < 0 || colonne < 0 || ligne >= length(map.carte) || colonne >= length(map.carte[0])) {
             return false;
         }
-        return !map.carte[ligne][colonne].isWall || (map.carte[ligne][colonne].isExit && map.carte[ligne][colonne].canExit);
+        if(map.carte[ligne][colonne].isExit) {
+            return map.carte[ligne][colonne].canExit;
+        }
+        return !map.carte[ligne][colonne].isWall;
     }
 
     void testCanGoTo() {
@@ -766,7 +769,7 @@ class IthyphalGame extends Program {
     String attack(Player p, Monster m) {
         // Return: "player" if the player lost, "monster" if the monster lost.
         while(p.healt > 0 && m.healt > 0) {
-            println("Vous avez " + getHealt(p) + " points de vie.");
+            println("Vous avez " + getHealt(p) + "  points de vie.");
             println("Le monstre a " + getHealt(m) + " points de vie.\n\n");
 
             println("Quelles attaques voulez-vous faire ?");
@@ -794,7 +797,7 @@ class IthyphalGame extends Program {
 
             // Monster attack
             if(m.healt > 0) {
-                if(random() < 0.5) {
+                if(random() < 0.85) {
                     p.healt -= m.attack;
                     println("Le monstre vous a infligé " + m.attack + " dégats !");
                 } else {
@@ -859,7 +862,7 @@ class IthyphalGame extends Program {
             rdm = (int) (1 + random() * (length(QUESTIONS) - 1));
             println(rdm);
             if(!QUESTIONS[rdm].dejaPosee) {
-                QUESTIONS[rdm].dejaPosee = true;
+                //?QUESTIONS[rdm].dejaPosee = true;
                 return QUESTIONS[rdm];
             }
         }
@@ -902,6 +905,44 @@ class IthyphalGame extends Program {
             }
         }
         return true;
+    }
+
+    int[] newPlayerPos(String direction, Map[][][] map, int ligne, int colonne, int etage, int newLigne, int newColonne, int newEtage, int player_x, int player_y) {
+        /* This function modify the player position when i travel a door */
+        Player p = map[etage][ligne][colonne].carte[player_x][player_y].player;
+        Cellule[][] carte = map[newEtage][newLigne][newColonne].carte;
+        int[] newPos = new int[2];
+        switch (direction) {
+            default:
+                newPos[0] = player_x;
+                newPos[1] = player_y;
+                break;
+            case "z":
+                map[etage][ligne][colonne].carte[length(carte) - 2][player_y].player = null;
+                map[newEtage][newLigne][newColonne].carte[length(carte) - 2][player_y].player = p;
+                newPos[0] = length(carte) - 2;
+                newPos[1] = player_y;
+                break;
+            case "q":
+                map[etage][ligne][colonne].carte[player_x][player_y].player = null;
+                map[newEtage][newLigne][newColonne].carte[player_x][length(carte[0]) - 2].player = p;
+                newPos[0] = player_x;
+                newPos[1] = length(carte[0]) - 2;
+                break;
+            case "s":
+                map[etage][ligne][colonne].carte[1][player_y].player = null;
+                map[newEtage][newLigne][newColonne].carte[1][player_y].player = p;
+                newPos[0] = 1;
+                newPos[1] = player_y;
+                break;
+            case "d":
+                map[etage][ligne][colonne].carte[player_x][1].player = null;
+                map[newEtage][newLigne][newColonne].carte[player_x][1].player = p;
+                newPos[0] = player_x;
+                newPos[1] = 1;
+                break;
+        }
+        return newPos;
     }
 
     void helpCommand() {
@@ -952,7 +993,7 @@ class IthyphalGame extends Program {
         
         int player_x = carte[DIMENSION][ligne][colonne].colonnePlayer;
         int player_y = carte[DIMENSION][ligne][colonne].lignePlayer;
-
+        boolean changementPiece = false;
         // Start game
         while(!fini && carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player.healt > 0) {
             clearScreen();
@@ -1044,19 +1085,31 @@ class IthyphalGame extends Program {
                     carte[DIMENSION][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].loot = null;
                 } else if(playerGoToDoor(carte[DIMENSION][ligne][colonne], direction)) {
                     if(carte[DIMENSION][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].canExit) {
-                        //!Code pour sortir de la carte vers une autre carte
+                        print("Vous sortez de cette salle !");
+                        delay(1000);
+                        int[] nouvelleSalleCoord = getDirection(direction, ligne, colonne);
+                        int[] newPos = newPlayerPos(direction, carte, ligne, colonne, DIMENSION, nouvelleSalleCoord[0], nouvelleSalleCoord[1], DIMENSION, player_x, player_y); //!AJOUTER LES ARGUMENTS !!!
+                        player_x = newPos[0];
+                        player_y = newPos[1];
+                        ligne = nouvelleSalleCoord[0];
+                        colonne = nouvelleSalleCoord[1];
+                        carte[DIMENSION][ligne][colonne].lignePlayer = player_x;
+                        carte[DIMENSION][ligne][colonne].colonnePlayer = player_y;
+                        changementPiece = true;
                     }
                 } else {
                     println("Vous avez avancé !");
                     delay(100);
                 }
 
-                if(movePlayer(carte[DIMENSION][ligne][colonne], direction)) {
+                if(!changementPiece && movePlayer(carte[DIMENSION][ligne][colonne], direction)) {
                     player_x = carte[DIMENSION][ligne][colonne].lignePlayer;
                     player_y = carte[DIMENSION][ligne][colonne].colonnePlayer;
-                } else {
+                } else if(!changementPiece) {
                     println("Erreur : Vous ne pouvez pas aller dans cette direction !");
                     delay(1000);
+                } else { //! Si le joueur a changé de pièce
+                    changementPiece = false;
                 }
             } else if(equals(direction, "h")) {
                 helpCommand();
@@ -1074,8 +1127,8 @@ class IthyphalGame extends Program {
     //! Prochaine chose à faire
     //? - Faire une fonction qui permet de sauvegarder la partie
     //? - Faire une fonction qui permet de charger une partie
-    //? - Faire en sorte que le jeu détecte quand le joueur va sur une porte et le fait sortir si la porte est ouverte
-    //? - Faire en sorte que quand le joueur va sur une porte ouverte, il soit téléporté sur une autre carte
+    //? - Faire en sorte que le jeu détecte quand le joueur va sur une porte et le fait sortir si la porte est ouverte // FAIT
+    //? - Faire en sorte que quand le joueur va sur une porte ouverte, il soit téléporté sur une autre carte // FAIT
     //? - Faire en sorte que le jeu détecte le nombre de monstres et si il n'y en a plus, il ouvre la ou les porte(s)
     //TODO Plus si j'ai le temps :)
 }
