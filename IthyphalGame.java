@@ -753,6 +753,15 @@ class IthyphalGame extends Program {
         return carte;
     }
 
+    Map[][][] loadFromSave() {
+        //TODO : Load from save
+        Map[][][] carte = new Map[5][5][5];
+
+        //!Code here
+
+        return carte;
+    }
+
 
     String attack(Player p, Monster m) {
         // Return: "player" if the player lost, "monster" if the monster lost.
@@ -920,136 +929,11 @@ class IthyphalGame extends Program {
         boolean fini = false;
         welcomeMessage();
         int choix = menuPrincipal();
-        if(choix == 1) { // Start new game
-            print("Chargement de la carte");
-            Map[][][] carte = generateMap();
-            for(int i = 0; i < 5; i++) {
-                print(".");
-                delay(500);
-            }
-            
-            int player_x = carte[DIMENSION][ligne][colonne].colonnePlayer;
-            int player_y = carte[DIMENSION][ligne][colonne].lignePlayer;
-
-            // Start game
-
-
-            while(!fini && carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player.healt > 0) {
-                clearScreen();
-                afficherMap(carte[DIMENSION][ligne][colonne]);
-                print("Votre choix : ");
-                String direction = readString();
-                if(equals(direction, "z") || equals(direction, "s") || equals(direction, "q") || equals(direction, "d")) {
-                    int[] coordonnees_prochaine = getDirection(direction, player_x, player_y);
-                    if(playerGoToMonster(carte[DIMENSION][ligne][colonne], direction)) { // Fini
-                        Monster m = carte[DIMENSION][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].monster;
-                        if(m != null) {
-                            println("Vous avez attaqué par un " + m.type + " !");
-                            delay(1000);
-                            String winner = attack(carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player, m);
-                            if(equals(winner, "player")) {
-                                println("Vous avez gagné !");
-                                delay(1000);
-                                carte[DIMENSION][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].monster = null;
-                            } else {
-                                println("Vous avez perdu !");
-                                delay(1000);
-                                carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player.healt = 0;
-                            }
-                        } else {
-                            println("Erreur : Vous avez attaqué un monstre qui n'existe pas !");
-                            println("Coordonnées : " + player_x + " " + player_y + "");
-                            delay(1000);
-                        }
-
-                    } else if(playerGoToLoot(carte[DIMENSION][ligne][colonne], direction)) {
-                        
-                        Loot l = carte[DIMENSION][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].loot;
-                        if(l == null) {
-                            println("Erreur : Vous avez trouvé un loot qui n'existe pas !");
-                            println("Coordonnées : " + player_x + " " + player_y + "");
-                            delay(5000);
-                        }
-
-                        TypeLoot type = l.type;
-                        int amount = l.amount;
-
-                        String choix_loot;
-                        do {
-                            println("Vous avez trouvé un loot !");
-                            println("->     1. Prendre le loot");
-                            println("->     2. Ne pas prendre le loot");
-                            print("Votre choix : ");
-                            choix_loot = readString();
-                        } while(!equals(choix_loot, "1") && !equals(choix_loot, "2"));
-
-                        if(equals(choix_loot, "1")) {
-                            if(askQuestion(1)) {
-                                println("Vous avez pris le loot !");
-                                delay(1000);
-                                if(type == TypeLoot.POTION) {
-                                    carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player.healt += amount;
-                                    println("Vous avez gagné " + amount + " points de vie !");
-                                    delay(1000);
-                                } else if(type == TypeLoot.RING) {
-                                    carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player.attack += amount;
-                                    println("Vous avez gagné " + amount + " points d'attaque !");
-                                    delay(1000);
-                                } else if(type == TypeLoot.ARMOR) {
-                                    carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player.shield += amount;
-                                    println("Vous avez gagné " + amount + " points de défense !");
-                                    delay(1000);
-                                }
-                            } else {
-                                println("Vous avez perdu le loot !");
-                                carte[DIMENSION][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].loot = null;
-                                delay(1000);
-                                println("Un monstre vous a attaqué !");
-                                delay(1000);
-                                Monster m = newMonsterRandom();
-                                String winner = attack(carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player, m);
-                                if(equals(winner, "player")) {
-                                    println("Vous avez gagné !");
-                                    delay(1000);
-                                } else {
-                                    println("Vous avez perdu !");
-                                    delay(1000);
-                                    carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player.healt = 0;
-                                }
-                            }
-                        } else {
-                            println("Vous avez décidé de ne pas prendre le loot ! Il a disparu !");
-                            delay(1000);
-                        }
-                        carte[DIMENSION][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].loot = null;
-                    } else if(playerGoToDoor(carte[DIMENSION][ligne][colonne], direction)) {
-                        println("Vous avez trouvé une porte !");
-                    } else {
-                        println("Vous avez avancé !");
-                        delay(100);
-                    }
-
-                    if(movePlayer(carte[DIMENSION][ligne][colonne], direction)) {
-                        player_x = carte[DIMENSION][ligne][colonne].lignePlayer;
-                        player_y = carte[DIMENSION][ligne][colonne].colonnePlayer;
-                    } else {
-                        println("Erreur : Vous ne pouvez pas aller dans cette direction !");
-                        delay(1000);
-                    }
-                } else if(equals(direction, "h")) {
-                    helpCommand();
-                } else if(equals(direction, "x")) {
-                    println("Vous avez quitté le jeu !");
-                    delay(1000);
-                    //TODO : Save game
-                } else {
-                    println("Erreur : Veuillez entrer une direction valide");
-                    delay(1000);
-                }
-            }
-
+        Map[][][] carte = new Map[5][5][5];
+        if(choix == 1) {
+            carte = generateMap();
         } else if(choix == 2) { // Load game
-
+            carte = loadFromSave();
         } else if(choix == 3) { // Quit game
             println("Merci d'avoir joué !");
             delay(1000);
@@ -1057,6 +941,132 @@ class IthyphalGame extends Program {
             println("Erreur : Veuillez entrer un nombre entre 1 et 3");
             delay(1000);
             algorithm();
+        }
+
+        // Load game
+        print("Chargement de la carte");
+        for(int i = 0; i < 5; i++) {
+            print(".");
+            delay(500);
+        }
+        
+        int player_x = carte[DIMENSION][ligne][colonne].colonnePlayer;
+        int player_y = carte[DIMENSION][ligne][colonne].lignePlayer;
+
+
+        // Start game
+        while(!fini && carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player.healt > 0) {
+            clearScreen();
+            afficherMap(carte[DIMENSION][ligne][colonne]);
+            print("Votre choix : ");
+            String direction = readString();
+            if(equals(direction, "z") || equals(direction, "s") || equals(direction, "q") || equals(direction, "d")) {
+                int[] coordonnees_prochaine = getDirection(direction, player_x, player_y);
+                if(playerGoToMonster(carte[DIMENSION][ligne][colonne], direction)) { // Fini
+                    Monster m = carte[DIMENSION][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].monster;
+                    if(m != null) {
+                        println("Vous avez attaqué par un " + m.type + " !");
+                        delay(1000);
+                        String winner = attack(carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player, m);
+                        if(equals(winner, "player")) {
+                            println("Vous avez gagné !");
+                            delay(1000);
+                            carte[DIMENSION][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].monster = null;
+                        } else {
+                            println("Vous avez perdu !");
+                            delay(1000);
+                            carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player.healt = 0;
+                        }
+                    } else {
+                        println("Erreur : Vous avez attaqué un monstre qui n'existe pas !");
+                        println("Coordonnées : " + player_x + " " + player_y + "");
+                        delay(1000);
+                    }
+
+                } else if(playerGoToLoot(carte[DIMENSION][ligne][colonne], direction)) {
+                    
+                    Loot l = carte[DIMENSION][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].loot;
+                    if(l == null) {
+                        println("Erreur : Vous avez trouvé un loot qui n'existe pas !");
+                        println("Coordonnées : " + player_x + " " + player_y + "");
+                        delay(5000);
+                    }
+
+                    TypeLoot type = l.type;
+                    int amount = l.amount;
+
+                    String choix_loot;
+                    do {
+                        println("Vous avez trouvé un loot !");
+                        println("->     1. Prendre le loot");
+                        println("->     2. Ne pas prendre le loot");
+                        print("Votre choix : ");
+                        choix_loot = readString();
+                    } while(!equals(choix_loot, "1") && !equals(choix_loot, "2"));
+
+                    if(equals(choix_loot, "1")) {
+                        if(askQuestion(1)) {
+                            println("Vous avez pris le loot !");
+                            delay(1000);
+                            if(type == TypeLoot.POTION) {
+                                carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player.healt += amount;
+                                println("Vous avez gagné " + amount + " points de vie !");
+                                delay(1000);
+                            } else if(type == TypeLoot.RING) {
+                                carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player.attack += amount;
+                                println("Vous avez gagné " + amount + " points d'attaque !");
+                                delay(1000);
+                            } else if(type == TypeLoot.ARMOR) {
+                                carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player.shield += amount;
+                                println("Vous avez gagné " + amount + " points de défense !");
+                                delay(1000);
+                            }
+                        } else {
+                            println("Vous avez perdu le loot !");
+                            carte[DIMENSION][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].loot = null;
+                            delay(1000);
+                            println("Un monstre vous a attaqué !");
+                            delay(1000);
+                            Monster m = newMonsterRandom();
+                            String winner = attack(carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player, m);
+                            if(equals(winner, "player")) {
+                                println("Vous avez gagné !");
+                                delay(1000);
+                            } else {
+                                println("Vous avez perdu !");
+                                delay(1000);
+                                carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player.healt = 0;
+                            }
+                        }
+                    } else {
+                        println("Vous avez décidé de ne pas prendre le loot ! Il a disparu !");
+                        delay(1000);
+                    }
+                    carte[DIMENSION][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].loot = null;
+                } else if(playerGoToDoor(carte[DIMENSION][ligne][colonne], direction)) {
+                    println("Vous avez trouvé une porte !");
+                } else {
+                    println("Vous avez avancé !");
+                    delay(100);
+                }
+
+                if(movePlayer(carte[DIMENSION][ligne][colonne], direction)) {
+                    player_x = carte[DIMENSION][ligne][colonne].lignePlayer;
+                    player_y = carte[DIMENSION][ligne][colonne].colonnePlayer;
+                } else {
+                    println("Erreur : Vous ne pouvez pas aller dans cette direction !");
+                    delay(1000);
+                }
+            } else if(equals(direction, "h")) {
+                helpCommand();
+            } else if(equals(direction, "x")) {
+                println("Vous avez quitté le jeu !");
+                delay(1000);
+                //TODO : Save game
+            } else {
+                println("Erreur : Veuillez entrer une direction valide");
+                delay(1000);
+            }
         }
     }
 }
