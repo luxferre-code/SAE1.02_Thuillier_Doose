@@ -685,7 +685,7 @@ class IthyphalGame extends Program {
         int colonne = map.colonnePlayer;
         ligne = getDirection(direction, ligne, colonne)[0];
         colonne = getDirection(direction, ligne, colonne)[1];
-        return map.carte[ligne][colonne].isExit && map.carte[ligne][colonne].canExit;
+        return map.carte[ligne][colonne].isExit;
     }
 
     boolean playerGoToMonster(Map map, String direction) {
@@ -953,7 +953,6 @@ class IthyphalGame extends Program {
         int player_x = carte[DIMENSION][ligne][colonne].colonnePlayer;
         int player_y = carte[DIMENSION][ligne][colonne].lignePlayer;
 
-
         // Start game
         while(!fini && carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player.healt > 0) {
             clearScreen();
@@ -1044,7 +1043,9 @@ class IthyphalGame extends Program {
                     }
                     carte[DIMENSION][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].loot = null;
                 } else if(playerGoToDoor(carte[DIMENSION][ligne][colonne], direction)) {
-                    println("Vous avez trouvé une porte !");
+                    if(carte[DIMENSION][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].canExit) {
+                        //!Code pour sortir de la carte vers une autre carte
+                    }
                 } else {
                     println("Vous avez avancé !");
                     delay(100);
@@ -1069,4 +1070,12 @@ class IthyphalGame extends Program {
             }
         }
     }
+
+    //! Prochaine chose à faire
+    //? - Faire une fonction qui permet de sauvegarder la partie
+    //? - Faire une fonction qui permet de charger une partie
+    //? - Faire en sorte que le jeu détecte quand le joueur va sur une porte et le fait sortir si la porte est ouverte
+    //? - Faire en sorte que quand le joueur va sur une porte ouverte, il soit téléporté sur une autre carte
+    //? - Faire en sorte que le jeu détecte le nombre de monstres et si il n'y en a plus, il ouvre la ou les porte(s)
+    //TODO Plus si j'ai le temps :)
 }
