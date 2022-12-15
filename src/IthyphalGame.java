@@ -1023,7 +1023,7 @@ class IthyphalGame extends Program {
             clearScreen();
             afficherMap(carte[DIMENSION][ligne][colonne]);
             print("Votre choix : ");
-            String direction = toLowercase(readString());
+            String direction = toLowerCase(readString());
             if(equals(direction, "z") || equals(direction, "s") || equals(direction, "q") || equals(direction, "d")) {
                 int[] coordonnees_prochaine = getDirection(direction, player_x, player_y);
                 if(playerGoToMonster(carte[DIMENSION][ligne][colonne], direction)) { 
