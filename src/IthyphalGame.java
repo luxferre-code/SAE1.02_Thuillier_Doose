@@ -1023,15 +1023,16 @@ class IthyphalGame extends Program {
             clearScreen();
             afficherMap(carte[DIMENSION][ligne][colonne]);
             print("Votre choix : ");
-            String direction = readString();
+            String direction = toLowercase(readString());
             if(equals(direction, "z") || equals(direction, "s") || equals(direction, "q") || equals(direction, "d")) {
                 int[] coordonnees_prochaine = getDirection(direction, player_x, player_y);
-                if(playerGoToMonster(carte[DIMENSION][ligne][colonne], direction)) { // Fini
+                if(playerGoToMonster(carte[DIMENSION][ligne][colonne], direction)) { 
                     Monster m = carte[DIMENSION][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].monster;
                     if(m != null) {
                         println("Vous avez attaqué par un " + m.type + " !");
                         delay(1000);
                         String winner = attack(carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player, m);
+                        //? Optimisable
                         if(equals(winner, "player")) {
                             println("Vous avez gagné !");
                             delay(1000);
@@ -1094,6 +1095,7 @@ class IthyphalGame extends Program {
                             delay(1000);
                             Monster m = newMonsterRandom();
                             String winner = attack(carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player, m);
+                            //? Optimisable
                             if(equals(winner, "player")) {
                                 updatePorte(carte, ligne, colonne, DIMENSION);
                                 println("Vous avez gagné !");
@@ -1111,10 +1113,12 @@ class IthyphalGame extends Program {
                     carte[DIMENSION][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].loot = null;
                 } else if(playerGoToDoor(carte[DIMENSION][ligne][colonne], direction)) {
                     if(carte[DIMENSION][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].canExit) {
+                        //! Faire une fonction pour ça parce que la on comprend plus rien !
                         print("Vous sortez de cette salle !");
                         delay(1000);
                         int[] nouvelleSalleCoord = getDirection(direction, ligne, colonne);
                         int[] newPos = newPlayerPos(direction, carte, ligne, colonne, DIMENSION, nouvelleSalleCoord[0], nouvelleSalleCoord[1], DIMENSION, player_x, player_y); //!AJOUTER LES ARGUMENTS !!!
+                        carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player = null;
                         player_x = newPos[0];
                         player_y = newPos[1];
                         ligne = nouvelleSalleCoord[0];
@@ -1150,6 +1154,9 @@ class IthyphalGame extends Program {
             }
         }
     }
+
+    //! Problème trouver
+    //? - Lors de la téléportation à une autre salle, le joueur est encore en mémoire dans l'ancienne salle // FAIT
 
     //! Prochaine chose à faire
     //? - Faire une fonction qui permet de sauvegarder la partie
