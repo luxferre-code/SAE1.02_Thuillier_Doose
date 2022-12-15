@@ -1159,6 +1159,7 @@ class IthyphalGame extends Program {
     //? - Lors de la téléportation à une autre salle, le joueur est encore en mémoire dans l'ancienne salle // FAIT
 
     //! Prochaine chose à faire
+    //? - FAIRE LA 3EME DIMENSION !!!
     //? - Faire une fonction qui permet de sauvegarder la partie
     //? - Faire une fonction qui permet de charger une partie
     //? - Faire en sorte que le jeu détecte quand le joueur va sur une porte et le fait sortir si la porte est ouverte // FAIT
