@@ -361,6 +361,7 @@ class IthyphalGame extends Program {
     }
 
     void testNewCellulePorte() {
+        /* Test of the function newCellulePorte */
         Cellule c = newCellulePorte();
         assertTrue(c.isExit);
         assertFalse(c.isWall);
@@ -374,6 +375,7 @@ class IthyphalGame extends Program {
     }
 
     void testNewCelluleMur() {
+        /* Test of the function newCelluleMur */
         Cellule c = newCelluleMur();
         assertFalse(c.isExit);
         assertTrue(c.isWall);
@@ -463,6 +465,7 @@ class IthyphalGame extends Program {
     }
 
     Map loadMap(String filename) {
+        /* Load a map from a file */
         extensions.CSVFile file = loadCSV("./maps/" + filename);
         int ligne = rowCount(file);
         int colonne = columnCount(file);
@@ -495,12 +498,14 @@ class IthyphalGame extends Program {
     }
 
     Cellule newCelluleEscalierMontant() {
+        /* Create a new cellule with an escalier montant */
         Cellule c = newCelluleEmpty();
         c.escalierMontant = true;
         return c;
     }
 
     Cellule newCelluleEscalierDescendant() {
+        /* Create a new cellule with an escalier descendant */
         Cellule c = newCelluleEmpty();
         c.escalierDescendant = true;
         return c;
@@ -591,6 +596,7 @@ class IthyphalGame extends Program {
     }
 
     void testCanGoTo() {
+        /* Test the canGoTo function */
         Map m = loadMap("debuggingMap.csv");
         assertTrue(canGoTo(m, 1, 1));
         assertTrue(canGoTo(m, 1, 3));
@@ -622,6 +628,7 @@ class IthyphalGame extends Program {
     }
 
     void testIsDirection() {
+        /* Test the isDirection function */
         assertTrue(isDirection("z"));
         assertTrue(isDirection("s"));
         assertTrue(isDirection("q"));
@@ -693,6 +700,7 @@ class IthyphalGame extends Program {
     }
 
     void testGetDirection() {
+        /* Test the getDirection function */
         int[] direction = getDirection("z", 1, 1);
         assertTrue(direction[0] == 0);
         assertTrue(direction[1] == 1);
@@ -761,6 +769,7 @@ class IthyphalGame extends Program {
     }
 
     void welcomeMessage() {
+        /* Print the welcome message */
         print("Bienvenue dans");
         for(int i = 0; i < 5; i++) {
             print(".");
@@ -792,6 +801,7 @@ class IthyphalGame extends Program {
     }
 
     int menuPrincipal() {
+        /* Print the main menu and ask player to choice */
         clearScreen();
         for(int i = 0; i < length("IthyphalGame"); i++) {
             text(randomANSIColor());
@@ -804,10 +814,19 @@ class IthyphalGame extends Program {
         println("2. Charger une partie");
         println("3. Quitter");
         print("Votre choix : ");
-        return readInt();
+        int choix;
+        do {
+            choix = readInt();
+            if(choix < 1 || choix > 3) {
+                println("Veuillez entrer un nombre entre 1 et 3");
+            }
+        } while(choix < 1 || choix > 3);
+        return choix;
+        }
     }
 
     Map[][][] generateMap() {
+        /* Generate the map */
         Map[][][] carte = new Map[5][5][5];
         for(int dim = 0; dim < 5; dim++) {
             for(int i = 0; i < 5; i++) {
@@ -893,6 +912,7 @@ class IthyphalGame extends Program {
     // Ask function
 
     String[][] loadQuestionFile(String filename) {
+        /* Load all questions in a file and return a 2D array with all the questions */
         CSVFile file = loadCSV("./questions/" + filename);
         String[][] questions = new String[rowCount(file)][columnCount(file)];
         for(int ligne = 1; ligne < length(questions); ligne++) {
@@ -904,6 +924,7 @@ class IthyphalGame extends Program {
     }
 
     Question newQuestion(String question, String bonne_rep, String[] bad_responses) {
+        /* Create a new question */
         Question q = new Question();
         q.question = question;
         q.bonne_rep = bonne_rep;
@@ -912,6 +933,7 @@ class IthyphalGame extends Program {
     }
 
     void testNewQuestion() {
+        /* Test the newQuestion function */
         String[] bad_responses = {"Réponse 1", "Réponse 2", "Réponse 3"};
         Question q = newQuestion("Question 1", "Réponse 4", bad_responses);
         assertArrayEquals(q.bad_responses, bad_responses);
@@ -920,6 +942,7 @@ class IthyphalGame extends Program {
     }
 
     Question[] loadAllQuestions(String[][] tabQuestions) {
+        /* Load all questions from a 2D array */
         Question[] questions = new Question[length(tabQuestions)];
         for(int i = 1; i < length(tabQuestions); i++) {
             String[] bad_responses = new String[3];
@@ -947,6 +970,7 @@ class IthyphalGame extends Program {
     }
 
     void randomiseTab(String[] tab) {
+        /* Randomise the order of a String array */
         for(int i = 0; i < length(tab); i++) {
             int random = (int) (random() * length(tab));
             String tmp = tab[i];
@@ -956,6 +980,7 @@ class IthyphalGame extends Program {
     }
 
     boolean askQuestion(int nbrToAsk) {
+        /* Ask a question to the player */
         for(int i = 0; i < nbrToAsk; i++) {
             Question q = getRandomQuestion();
             String[] tab = new String[4];
@@ -1023,6 +1048,7 @@ class IthyphalGame extends Program {
     }
 
     boolean monsterInCarte(Cellule[][] carte) {
+        /* Check if there is a monster in the carte */
         for(int i = 0; i < length(carte); i++) {
             for(int j = 0; j < length(carte[0]); j++) {
                 if(carte[i][j].monster != null) {
@@ -1034,6 +1060,7 @@ class IthyphalGame extends Program {
     }
 
     void update(Map[][][] map, int ligne, int colonne, int etage) {
+        /* Update the map */
         Cellule[][] carte = map[etage][ligne][colonne].carte;
         if(!monsterInCarte(carte)) {
             for(int i = 0; i < length(carte); i++) {
@@ -1045,6 +1072,7 @@ class IthyphalGame extends Program {
     }
 
     void helpCommand() {
+        /* Display the help */
         println("Vous êtes sur la page d'aide du jeu");
         println("Voici la liste des touches disponibles dans le jeu: ");
         println("    - Z : Déplacement vers le haut");
@@ -1067,6 +1095,7 @@ class IthyphalGame extends Program {
     }
 
     void monterEscalier(Map[][][] map, int ligne, int colonne, int etageActu, int player_x, int player_y) {
+        /* Move the player to the next floor */
         Cellule[][] ancienneCarte = map[etageActu][ligne][colonne].carte;
         Cellule[][] nouvelleCarte = map[etageActu + 1][ligne][colonne].carte;
         Player p = ancienneCarte[player_x][player_y].player;
@@ -1079,6 +1108,7 @@ class IthyphalGame extends Program {
     }
 
     void descendreEscalier(Map[][][] map, int ligne, int colonne, int etageActu, int player_x, int player_y) {
+        /* Move the player to the previous floor */
         Cellule[][] ancienneCarte = map[etageActu][ligne][colonne].carte;
         Cellule[][] nouvelleCarte = map[etageActu - 1][ligne][colonne].carte;
         Player p = ancienneCarte[player_x][player_y].player;
@@ -1273,15 +1303,23 @@ class IthyphalGame extends Program {
     }
 
     //! Problème trouver
-    //? - Lors de la téléportation à une autre salle, le joueur est encore en mémoire dans l'ancienne salle // FAIT
-    //? - Quand on monte un escalier, le jeu ne détecte pas le joueur dans la salle du dessus // FAIT
+    //* - Aucun pour le moment
 
     //! Prochaine chose à faire
-    //? - FAIRE LA 3EME etage !!! // FAIT
     //? - Faire une fonction qui permet de sauvegarder la partie
     //? - Faire une fonction qui permet de charger une partie
+    
+
+    //! Ce qui a été fait
+    //? - Lors de la téléportation à une autre salle, le joueur est encore en mémoire dans l'ancienne salle // FAIT
+    //? - Quand on monte un escalier, le jeu ne détecte pas le joueur dans la salle du dessus // FAIT
+    //? - FAIRE LA 3EME etage !!! // FAIT
     //? - Faire en sorte que le jeu détecte quand le joueur va sur une porte et le fait sortir si la porte est ouverte // FAIT
     //? - Faire en sorte que quand le joueur va sur une porte ouverte, il soit téléporté sur une autre carte // FAIT
     //? - Faire en sorte que le jeu détecte le nombre de monstres et si il n'y en a plus, il ouvre la ou les porte(s) // FAIT
+
+
+
+
     //TODO Plus si j'ai le temps :)
 }
