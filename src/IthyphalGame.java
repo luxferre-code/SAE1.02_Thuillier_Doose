@@ -470,10 +470,26 @@ class IthyphalGame extends Program {
                     map.carte[i][j] = newCelluleMur();
                 } else if(equals(s, "#")) { // Empty case
                     map.carte[i][j] = newCelluleEmpty();
+                } else if(equals(s, "U")) { // Monter l'escalier case
+                    map.carte[i][j] = newCelluleEscalierMontant();
+                } else if(equals(s, "D")) { // Descendre l'escalier case
+                    map.carte[i][j] = newCelluleEscalierDescendant();
                 }
             }
         }
         return map;
+    }
+
+    Cellule newCelluleEscalierMontant() {
+        Cellule c = newCelluleEmpty();
+        c.escalierMontant = true;
+        return c;
+    }
+
+    Cellule newCelluleEscalierDescendant() {
+        Cellule c = newCelluleEmpty();
+        c.escalierDescendant = true;
+        return c;
     }
 
     void testLoadMap() {
@@ -526,6 +542,18 @@ class IthyphalGame extends Program {
                     print(ANSI_BOLD + ANSI_RED + "☠" + ANSI_RESET);
                 } else if(map.carte[i][j].loot != null) {
                     print(ANSI_BOLD + ANSI_YELLOW + "♦" + ANSI_RESET);
+                } else if(map.carte[i][j].escalierMontant) {
+                    if(map.carte[i][j].canExit) {
+                        print(ANSI_BOLD + ANSI_GREEN + "▲" + ANSI_RESET);
+                    } else {
+                        print(ANSI_BOLD + ANSI_RED + "▲" + ANSI_RESET);
+                    }
+                } else if(map.carte[i][j].escalierDescendant) {
+                    if(map.carte[i][j].canExit) {
+                        print(ANSI_BOLD + ANSI_GREEN + "▼" + ANSI_RESET);
+                    } else {
+                        print(ANSI_BOLD + ANSI_RED + "▼" + ANSI_RESET);
+                    }
                 } else {
                     print(" ");
                 }
@@ -707,6 +735,15 @@ class IthyphalGame extends Program {
         ligne = getDirection(direction, ligne, colonne)[0];
         colonne = getDirection(direction, ligne, colonne)[1];
         return map.carte[ligne][colonne].loot != null;
+    }
+
+    boolean playerGoToStairs(Map map, String direction) {
+        /* Check if the player can go to the stairs */
+        int ligne = map.lignePlayer;
+        int colonne = map.colonnePlayer;
+        ligne = getDirection(direction, ligne, colonne)[0];
+        colonne = getDirection(direction, ligne, colonne)[1];
+        return map.carte[ligne][colonne].escalierDescendant || map.carte[ligne][colonne].escalierMontant;
     }
 
     void welcomeMessage() {
@@ -963,6 +1000,10 @@ class IthyphalGame extends Program {
                 for(int j = 0; j < length(carte[0]); j++) {
                     if(carte[i][j].isExit) {
                         carte[i][j].canExit = true;
+                    } else if(carte[i][j].escalierMontant) {
+                        carte[i][j].canExit = true;
+                    } else if(carte[i][j].escalierDescendant) {
+                        carte[i][j].canExit = true;
                     }
                 }
             }
@@ -983,6 +1024,30 @@ class IthyphalGame extends Program {
         println("Bonne chance !");
         print("Appuyez sur une entrée pour revenir au jeu");
         readString();
+    }
+
+    void monterEscalier(Map[][][] map, int ligne, int colonne, int etageActu, int player_x, int player_y) {
+        Cellule[][] ancienneCarte = map[etageActu][ligne][colonne].carte;
+        Cellule[][] nouvelleCarte = map[etageActu + 1][ligne][colonne].carte;
+        Player p = ancienneCarte[player_x][player_y].player;
+        ancienneCarte[player_x][player_y].player = null;
+        nouvelleCarte[player_x][player_y].player = p;
+        map[etageActu + 1][ligne][colonne].lignePlayer = player_x;
+        map[etageActu + 1][ligne][colonne].colonnePlayer = player_y;
+        map[etageActu][ligne][colonne].carte = ancienneCarte;
+        map[etageActu + 1][ligne][colonne].carte = nouvelleCarte;
+    }
+
+    void descendreEscalier(Map[][][] map, int ligne, int colonne, int etageActu, int player_x, int player_y) {
+        Cellule[][] ancienneCarte = map[etageActu][ligne][colonne].carte;
+        Cellule[][] nouvelleCarte = map[etageActu - 1][ligne][colonne].carte;
+        Player p = ancienneCarte[player_x][player_y].player;
+        ancienneCarte[player_x][player_y].player = null;
+        nouvelleCarte[player_x][player_y].player = p;
+        map[etageActu - 1][ligne][colonne].lignePlayer = player_x;
+        map[etageActu - 1][ligne][colonne].colonnePlayer = player_y;
+        map[etageActu][ligne][colonne].carte = ancienneCarte;
+        map[etageActu - 1][ligne][colonne].carte = nouvelleCarte;
     }
 
     // Algorithm principal
@@ -1049,7 +1114,7 @@ class IthyphalGame extends Program {
                         delay(1000);
                     }
 
-                } else if(playerGoToLoot(carte[DIMENSION][ligne][colonne], direction)) {
+                } else if(playerGoToLoot(carte[DIMENSION][ligne][colonne], direction)) { //! A optimiser
                     
                     Loot l = carte[DIMENSION][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].loot;
                     if(l == null) {
@@ -1128,9 +1193,18 @@ class IthyphalGame extends Program {
                         changementPiece = true;
                         updatePorte(carte, ligne, colonne, DIMENSION);
                     }
-                } else {
-                    println("Vous avez avancé !");
-                    delay(100);
+                } else if(playerGoToStairs(carte[DIMENSION][ligne][colonne], direction)) {
+                    if(carte[DIMENSION][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].canExit) {
+                        if(carte[DIMENSION][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].escalierMontant) {
+                            print("Vous montez les escaliers !");
+                            delay(1000);
+                            monterEscalier(carte, ligne, colonne, DIMENSION, player_x, player_y);
+                        } else {
+                            print("Vous descendez les escaliers !");
+                            delay(1000);
+                            descendreEscalier(carte, ligne, colonne, DIMENSION, player_x, player_y);
+                        }
+                    }
                 }
 
                 if(!changementPiece && movePlayer(carte[DIMENSION][ligne][colonne], direction)) {

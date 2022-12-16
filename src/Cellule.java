@@ -5,4 +5,6 @@ class Cellule {
     boolean isWall = false;
     boolean isExit = false;
     boolean canExit = false;
+    boolean escalierDescendant = false;
+    boolean escalierMontant = false;
 }
