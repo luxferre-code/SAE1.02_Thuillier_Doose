@@ -2,8 +2,6 @@ import extensions.*;
 
 class IthyphalGame extends Program {
 
-    int DIMENSION = 0;
-
     // MONSTER VARIABLES
     final double ZOMBIE_SPAWN_PROBA = 0.5;
     final int ZOMBIE_ATTACK = 3;
@@ -252,6 +250,26 @@ class IthyphalGame extends Program {
         assertEquals("", getHealt(p));
     }
 
+    String getShield(Player p) {
+        /* Return the shield of the player */
+        String s = "";
+        for(int i = 0; i < p.shield; i++) {
+            s += "🛡️"; // Not working on the Windows console
+        }
+        return s;
+    }
+
+    void testGetShield() {
+        /* Test of the function getShield */
+        Player p = newPlayer("Bob");
+        p.shield = 5;
+        assertEquals("🛡️🛡️🛡️🛡️🛡️", getShield(p));
+        p.shield = 0;
+        assertEquals("", getShield(p));
+        p.shield = -1;
+        assertEquals("", getShield(p));
+    }
+
     String getHealt(Monster m) {
         /* Return the healt of the monster */
         String s = "";
@@ -456,10 +474,10 @@ class IthyphalGame extends Program {
                     map.carte[i][j] = newCellulePlayer(newPlayer("Not defined"));
                     map.lignePlayer = i;
                     map.colonnePlayer = j;
-                    DIMENSION = charAt(filename, 3) - '0';
-                    println("DIMENSION = " + DIMENSION);
                     println("map.lignePlayer = " + map.lignePlayer);
                     println("map.colonnePlayer = " + map.colonnePlayer);
+                    //*Le joueur est toujours à l'étage 0 !
+
                 } else if(equals(s, "M")) { // Monster case
                     map.carte[i][j] = newCelluleMonster(newMonsterRandom());
                 } else if(equals(s, "L")) { // Loot case
@@ -541,7 +559,7 @@ class IthyphalGame extends Program {
                 } else if(map.carte[i][j].monster != null) {
                     print(ANSI_BOLD + ANSI_RED + "☠" + ANSI_RESET);
                 } else if(map.carte[i][j].loot != null) {
-                    print(ANSI_BOLD + ANSI_YELLOW + "♦" + ANSI_RESET);
+                    print(ANSI_BOLD + ANSI_YELLOW + "☼" + ANSI_RESET);
                 } else if(map.carte[i][j].escalierMontant) {
                     if(map.carte[i][j].canExit) {
                         print(ANSI_BOLD + ANSI_GREEN + "▲" + ANSI_RESET);
@@ -760,6 +778,18 @@ class IthyphalGame extends Program {
         delay(2000);
         println("Vous pouvez vous déplacer avec les touches Z, Q, S et D. Et la touche H pour afficher l'aide.");
         delay(2000);
+        println("Voici les différentes cases que vous pouvez ou non intérragir: ");
+        delay(2000);
+        println("    - " + ANSI_GREEN + ANSI_BOLD + "Vert" + ANSI_RESET + " : Vous pouvez intérragir avec cette case");
+        delay(2000);
+        println("    - " + ANSI_RED + ANSI_BOLD + "Rouge" + ANSI_RESET + " : Vous ne pouvez pas intérragir avec cette case");
+        delay(2000);
+        println("Les monstres sont représentés par un " + ANSI_RED + ANSI_BOLD + "☠" + ANSI_RESET + "  et les portes sont représentées par un " + ANSI_BLUE + ANSI_BOLD + "▩" + ANSI_RESET + " .");
+        delay(2000);
+        println("Des coffres sont présents dans le donjon, ils sont représentés par un " + ANSI_YELLOW + ANSI_BOLD + "☼" + ANSI_RESET + " .");
+        delay(2000);
+        println("Les escaliers sont représentés par ▲ et ▼.");
+        delay(1000);
         println("Bonne chance jeune aventurier !");
         print("Appuyez sur entrer pour continuer...");
         readString();
@@ -807,6 +837,7 @@ class IthyphalGame extends Program {
         // Return: "player" if the player lost, "monster" if the monster lost.
         while(p.healt > 0 && m.healt > 0) {
             println("Vous avez " + getHealt(p) + "  points de vie.");
+            println("Vous avez " + getShield(p) + " points de bouclier.");
             println("Le monstre a " + getHealt(m) + " points de vie.\n\n");
 
             println("Quelles attaques voulez-vous faire ?");
@@ -835,8 +866,21 @@ class IthyphalGame extends Program {
             // Monster attack
             if(m.healt > 0) {
                 if(random() < 0.85) {
+                    if(p.shield > 0) {
+                        p.shield -= m.attack;
+                        println("Le monstre vous a infligé " + m.attack + " dégats !");
+                        if(p.shield < 0) {
+                            p.healt += p.shield;
+                            p.shield = 0;
+                            println("Votre bouclier a été détruit !");
+                        } else {
+                            println("Votre bouclier a absorbé " + m.attack + " dégats !");
+                        }
+                    } else {
+                        p.healt -= m.attack;
+                        println("Le monstre vous a infligé " + m.attack + " dégats !");
+                    }
                     p.healt -= m.attack;
-                    println("Le monstre vous a infligé " + m.attack + " dégats !");
                 } else {
                     println("Le monstre a raté son attaque !");
                 }
@@ -993,18 +1037,12 @@ class IthyphalGame extends Program {
         return false;
     }
 
-    void updatePorte(Map[][][] map, int ligne, int colonne, int etage) {
+    void update(Map[][][] map, int ligne, int colonne, int etage) {
         Cellule[][] carte = map[etage][ligne][colonne].carte;
         if(!monsterInCarte(carte)) {
             for(int i = 0; i < length(carte); i++) {
                 for(int j = 0; j < length(carte[0]); j++) {
-                    if(carte[i][j].isExit) {
-                        carte[i][j].canExit = true;
-                    } else if(carte[i][j].escalierMontant) {
-                        carte[i][j].canExit = true;
-                    } else if(carte[i][j].escalierDescendant) {
-                        carte[i][j].canExit = true;
-                    }
+                    carte[i][j].canExit = true;
                 }
             }
         } 
@@ -1021,6 +1059,12 @@ class IthyphalGame extends Program {
         println("    - I : Afficher les informations du joueur");
         println("    - X : Quitter le jeu");
         println("Nous vous rappellons que pour passer à une autre pièce du donjon, il faut canExitavoir battu tous les monstres présents dans la pièce actuelle.");
+        println("Voici les différentes cases que vous pouvez ou non intérragir: ");
+        println("    - " + ANSI_GREEN + ANSI_BOLD + "Vert" + ANSI_RESET + " : Vous pouvez intérragir avec cette case");
+        println("    - " + ANSI_RED + ANSI_BOLD + "Rouge" + ANSI_RESET + " : Vous ne pouvez pas intérragir avec cette case");
+        println("Les monstres sont représentés par un " + ANSI_RED + ANSI_BOLD + "☠" + ANSI_RESET + "  et les portes sont représentées par un " + ANSI_BLUE + ANSI_BOLD + "▩" + ANSI_RESET + " .");
+        println("Des coffres sont présents dans le donjon, ils sont représentés par un " + ANSI_YELLOW + ANSI_BOLD + "☼" + ANSI_RESET + " .");
+        println("Les escaliers sont représentés par ▲ et ▼.");
         println("Bonne chance !");
         print("Appuyez sur une entrée pour revenir au jeu");
         readString();
@@ -1056,6 +1100,7 @@ class IthyphalGame extends Program {
         // Main function
         int ligne = 0;
         int colonne = 0;
+        int etage = 0;
         boolean fini = false;
         welcomeMessage();
         int choix = menuPrincipal();
@@ -1063,7 +1108,9 @@ class IthyphalGame extends Program {
         if(choix == 1) {
             carte = generateMap();
         } else if(choix == 2) { // Load game
-            carte = loadFromSave();
+            println("La fonctionnalité de chargement de partie n'est pas encore disponible, nous sommes désolés pour la gêne occasionnée...");
+            delay(5000);
+            //! carte = loadFromSave();
         } else if(choix == 3) { // Quit game
             println("Merci d'avoir joué !");
             delay(1000);
@@ -1080,33 +1127,32 @@ class IthyphalGame extends Program {
             delay(500);
         }
         
-        int player_x = carte[DIMENSION][ligne][colonne].colonnePlayer;
-        int player_y = carte[DIMENSION][ligne][colonne].lignePlayer;
+        int player_x = carte[etage][ligne][colonne].colonnePlayer;
+        int player_y = carte[etage][ligne][colonne].lignePlayer;
         boolean changementPiece = false;
         // Start game
-        while(!fini && carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player.healt > 0) {
+        while(!fini && carte[etage][ligne][colonne].carte[player_x][player_y].player.healt > 0) {
             clearScreen();
-            afficherMap(carte[DIMENSION][ligne][colonne]);
+            afficherMap(carte[etage][ligne][colonne]);
             print("Votre choix : ");
             String direction = toLowerCase(readString());
             if(equals(direction, "z") || equals(direction, "s") || equals(direction, "q") || equals(direction, "d")) {
                 int[] coordonnees_prochaine = getDirection(direction, player_x, player_y);
-                if(playerGoToMonster(carte[DIMENSION][ligne][colonne], direction)) { 
-                    Monster m = carte[DIMENSION][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].monster;
+                if(playerGoToMonster(carte[etage][ligne][colonne], direction)) { 
+                    Monster m = carte[etage][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].monster;
                     if(m != null) {
                         println("Vous avez attaqué par un " + m.type + " !");
                         delay(1000);
-                        String winner = attack(carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player, m);
+                        String winner = attack(carte[etage][ligne][colonne].carte[player_x][player_y].player, m);
                         //? Optimisable
                         if(equals(winner, "player")) {
                             println("Vous avez gagné !");
                             delay(1000);
-                            carte[DIMENSION][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].monster = null;
-                            updatePorte(carte, ligne, colonne, DIMENSION);
+                            carte[etage][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].monster = null;
                         } else {
                             println("Vous avez perdu !");
                             delay(1000);
-                            carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player.healt = 0;
+                            carte[etage][ligne][colonne].carte[player_x][player_y].player.healt = 0;
                         }
                     } else {
                         println("Erreur : Vous avez attaqué un monstre qui n'existe pas !");
@@ -1114,9 +1160,9 @@ class IthyphalGame extends Program {
                         delay(1000);
                     }
 
-                } else if(playerGoToLoot(carte[DIMENSION][ligne][colonne], direction)) { //! A optimiser
+                } else if(playerGoToLoot(carte[etage][ligne][colonne], direction)) { //! A optimiser
                     
-                    Loot l = carte[DIMENSION][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].loot;
+                    Loot l = carte[etage][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].loot;
                     if(l == null) {
                         println("Erreur : Vous avez trouvé un loot qui n'existe pas !");
                         println("Coordonnées : " + player_x + " " + player_y + "");
@@ -1140,76 +1186,76 @@ class IthyphalGame extends Program {
                             println("Vous avez pris le loot !");
                             delay(1000);
                             if(type == TypeLoot.POTION) {
-                                carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player.healt += amount;
+                                carte[etage][ligne][colonne].carte[player_x][player_y].player.healt += amount;
                                 println("Vous avez gagné " + amount + " points de vie !");
                                 delay(1000);
                             } else if(type == TypeLoot.RING) {
-                                carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player.attack += amount;
+                                carte[etage][ligne][colonne].carte[player_x][player_y].player.attack += amount;
                                 println("Vous avez gagné " + amount + " points d'attaque !");
                                 delay(1000);
                             } else if(type == TypeLoot.ARMOR) {
-                                carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player.shield += amount;
+                                carte[etage][ligne][colonne].carte[player_x][player_y].player.shield += amount;
                                 println("Vous avez gagné " + amount + " points de défense !");
                                 delay(1000);
                             }
                         } else {
                             println("Vous avez perdu le loot !");
-                            carte[DIMENSION][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].loot = null;
+                            carte[etage][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].loot = null;
                             delay(1000);
                             println("Un monstre vous a attaqué !");
                             delay(1000);
                             Monster m = newMonsterRandom();
-                            String winner = attack(carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player, m);
+                            String winner = attack(carte[etage][ligne][colonne].carte[player_x][player_y].player, m);
                             //? Optimisable
                             if(equals(winner, "player")) {
-                                updatePorte(carte, ligne, colonne, DIMENSION);
                                 println("Vous avez gagné !");
                                 delay(1000);
                             } else {
                                 println("Vous avez perdu !");
                                 delay(1000);
-                                carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player.healt = 0;
+                                carte[etage][ligne][colonne].carte[player_x][player_y].player.healt = 0;
                             }
                         }
                     } else {
                         println("Vous avez décidé de ne pas prendre le loot ! Il a disparu !");
                         delay(1000);
                     }
-                    carte[DIMENSION][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].loot = null;
-                } else if(playerGoToDoor(carte[DIMENSION][ligne][colonne], direction)) {
-                    if(carte[DIMENSION][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].canExit) {
+                    carte[etage][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].loot = null;
+                } else if(playerGoToDoor(carte[etage][ligne][colonne], direction)) {
+                    if(carte[etage][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].canExit) {
                         //! Faire une fonction pour ça parce que la on comprend plus rien !
                         print("Vous sortez de cette salle !");
                         delay(1000);
                         int[] nouvelleSalleCoord = getDirection(direction, ligne, colonne);
-                        int[] newPos = newPlayerPos(direction, carte, ligne, colonne, DIMENSION, nouvelleSalleCoord[0], nouvelleSalleCoord[1], DIMENSION, player_x, player_y); //!AJOUTER LES ARGUMENTS !!!
-                        carte[DIMENSION][ligne][colonne].carte[player_x][player_y].player = null;
+                        int[] newPos = newPlayerPos(direction, carte, ligne, colonne, etage, nouvelleSalleCoord[0], nouvelleSalleCoord[1], etage, player_x, player_y); //!AJOUTER LES ARGUMENTS !!!
+                        carte[etage][ligne][colonne].carte[player_x][player_y].player = null;
                         player_x = newPos[0];
                         player_y = newPos[1];
                         ligne = nouvelleSalleCoord[0];
                         colonne = nouvelleSalleCoord[1];
-                        carte[DIMENSION][ligne][colonne].lignePlayer = player_x;
-                        carte[DIMENSION][ligne][colonne].colonnePlayer = player_y;
+                        carte[etage][ligne][colonne].lignePlayer = player_x;
+                        carte[etage][ligne][colonne].colonnePlayer = player_y;
                         changementPiece = true;
-                        updatePorte(carte, ligne, colonne, DIMENSION);
                     }
-                } else if(playerGoToStairs(carte[DIMENSION][ligne][colonne], direction)) {
-                    if(carte[DIMENSION][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].canExit) {
-                        if(carte[DIMENSION][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].escalierMontant) {
+                } else if(playerGoToStairs(carte[etage][ligne][colonne], direction)) {
+                    if(carte[etage][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].canExit) {
+                        if(carte[etage][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].escalierMontant) {
                             print("Vous montez les escaliers !");
                             delay(1000);
-                            monterEscalier(carte, ligne, colonne, DIMENSION, player_x, player_y);
+                            monterEscalier(carte, ligne, colonne, etage, player_x, player_y);
+                            etage++;
                         } else {
                             print("Vous descendez les escaliers !");
                             delay(1000);
-                            descendreEscalier(carte, ligne, colonne, DIMENSION, player_x, player_y);
+                            descendreEscalier(carte, ligne, colonne, etage, player_x, player_y);
+                            etage--;
                         }
                     }
                 }
-
-                if(!changementPiece && movePlayer(carte[DIMENSION][ligne][colonne], direction)) {
-                    player_x = carte[DIMENSION][ligne][colonne].lignePlayer;
-                    player_y = carte[DIMENSION][ligne][colonne].colonnePlayer;
+                update(carte, ligne, colonne, etage);
+                if(!changementPiece && movePlayer(carte[etage][ligne][colonne], direction)) {
+                    player_x = carte[etage][ligne][colonne].lignePlayer;
+                    player_y = carte[etage][ligne][colonne].colonnePlayer;
                 } else if(!changementPiece) {
                     println("Erreur : Vous ne pouvez pas aller dans cette direction !");
                     delay(1000);
@@ -1231,13 +1277,14 @@ class IthyphalGame extends Program {
 
     //! Problème trouver
     //? - Lors de la téléportation à une autre salle, le joueur est encore en mémoire dans l'ancienne salle // FAIT
+    //? - Quand on monte un escalier, le jeu ne détecte pas le joueur dans la salle du dessus // FAIT
 
     //! Prochaine chose à faire
-    //? - FAIRE LA 3EME DIMENSION !!!
+    //? - FAIRE LA 3EME etage !!! // FAIT
     //? - Faire une fonction qui permet de sauvegarder la partie
     //? - Faire une fonction qui permet de charger une partie
     //? - Faire en sorte que le jeu détecte quand le joueur va sur une porte et le fait sortir si la porte est ouverte // FAIT
     //? - Faire en sorte que quand le joueur va sur une porte ouverte, il soit téléporté sur une autre carte // FAIT
-    //? - Faire en sorte que le jeu détecte le nombre de monstres et si il n'y en a plus, il ouvre la ou les porte(s)
+    //? - Faire en sorte que le jeu détecte le nombre de monstres et si il n'y en a plus, il ouvre la ou les porte(s) // FAIT
     //TODO Plus si j'ai le temps :)
 }
