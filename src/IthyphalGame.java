@@ -399,13 +399,13 @@ class IthyphalGame extends Program {
         /* Create a new loot in a cellule */
         double r = random();
         if(r < POTION_SPAWN_PROBA) {
-            int heal = (int) (1 + random() * 10);
+            int heal = (int) (1 + random() * 5);
             return newLoot(TypeLoot.POTION, heal);
         } else if(r < POTION_SPAWN_PROBA + RING_SPAWN_PROBA) {
-            int attack = (int) (1 + random() * 10);
+            int attack = (int) (1 + random() * 5);
             return newLoot(TypeLoot.RING, attack);
         } else if(r < POTION_SPAWN_PROBA + RING_SPAWN_PROBA + ARMOR_SPAWN_PROBA) {
-            int defense = (int) (1 + random() * 10);
+            int defense = (int) (1 + random() * 5);
             return newLoot(TypeLoot.ARMOR, defense);
         } else {
             return null;
@@ -474,10 +474,6 @@ class IthyphalGame extends Program {
                     map.carte[i][j] = newCellulePlayer(newPlayer("Not defined"));
                     map.lignePlayer = i;
                     map.colonnePlayer = j;
-                    println("map.lignePlayer = " + map.lignePlayer);
-                    println("map.colonnePlayer = " + map.colonnePlayer);
-                    //*Le joueur est toujours à l'étage 0 !
-
                 } else if(equals(s, "M")) { // Monster case
                     map.carte[i][j] = newCelluleMonster(newMonsterRandom());
                 } else if(equals(s, "L")) { // Loot case
@@ -837,7 +833,7 @@ class IthyphalGame extends Program {
         // Return: "player" if the player lost, "monster" if the monster lost.
         while(p.healt > 0 && m.healt > 0) {
             println("Vous avez " + getHealt(p) + "  points de vie.");
-            println("Vous avez " + getShield(p) + " points de bouclier.");
+            println("Vous avez " + getShield(p) + "  points de bouclier.");
             println("Le monstre a " + getHealt(m) + " points de vie.\n\n");
 
             println("Quelles attaques voulez-vous faire ?");
@@ -1267,6 +1263,7 @@ class IthyphalGame extends Program {
             } else if(equals(direction, "x")) {
                 println("Vous avez quitté le jeu !");
                 delay(1000);
+                break;
                 //TODO : Save game
             } else {
                 println("Erreur : Veuillez entrer une direction valide");
