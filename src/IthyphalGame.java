@@ -1249,7 +1249,6 @@ class IthyphalGame extends Program {
                     carte[etage][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].loot = null;
                 } else if(playerGoToDoor(carte[etage][ligne][colonne], direction)) {
                     if(carte[etage][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].canExit) {
-                        //! Faire une fonction pour ça parce que la on comprend plus rien !
                         print("Vous sortez de cette salle !");
                         delay(1000);
                         int[] nouvelleSalleCoord = getDirection(direction, ligne, colonne);
@@ -1317,7 +1316,6 @@ class IthyphalGame extends Program {
     //? - Faire en sorte que le jeu détecte quand le joueur va sur une porte et le fait sortir si la porte est ouverte // FAIT
     //? - Faire en sorte que quand le joueur va sur une porte ouverte, il soit téléporté sur une autre carte // FAIT
     //? - Faire en sorte que le jeu détecte le nombre de monstres et si il n'y en a plus, il ouvre la ou les porte(s) // FAIT
-
 
 
 
