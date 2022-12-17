@@ -822,7 +822,6 @@ class IthyphalGame extends Program {
             }
         } while(choix < 1 || choix > 3);
         return choix;
-        }
     }
 
     Map[][][] generateMap() {
@@ -1249,6 +1248,7 @@ class IthyphalGame extends Program {
                     carte[etage][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].loot = null;
                 } else if(playerGoToDoor(carte[etage][ligne][colonne], direction)) {
                     if(carte[etage][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].canExit) {
+                        //! Faire une fonction pour ça parce que la on comprend plus rien !
                         print("Vous sortez de cette salle !");
                         delay(1000);
                         int[] nouvelleSalleCoord = getDirection(direction, ligne, colonne);
@@ -1300,6 +1300,7 @@ class IthyphalGame extends Program {
             }
         }
     }
+}
 
     //! Problème trouver
     //* - Aucun pour le moment
@@ -1319,5 +1320,5 @@ class IthyphalGame extends Program {
 
 
 
+
     //TODO Plus si j'ai le temps :)
-}
