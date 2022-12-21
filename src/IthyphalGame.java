@@ -27,6 +27,10 @@ class IthyphalGame extends Program {
     final String[] FILESQUESTION = new String[]{"init_question.csv"};
     Question[] QUESTIONS = loadAllQuestions(loadQuestionFile(FILESQUESTION[0]));
 
+    // ENVIROMENT VARIABLES
+    String[] AllPosMonsterKillTab = new String[0];
+    String[] AllPosLootTakeTab = new String[0];
+
 
     Player newPlayer(String nom) {
         /* Constructor of class PLAYER */
@@ -1119,6 +1123,43 @@ class IthyphalGame extends Program {
         map[etageActu - 1][ligne][colonne].carte = nouvelleCarte;
     }
 
+    boolean saveGame(Map[][][] map, String name, int ligne, int colonne, int etage) {
+        /* Save the game */
+        /* File format:
+            name, healt, attack, shield, player_x, player_y, etage, AllPosMonsterKill, AllPosLootTake */
+        File file = newFile("./saves/" + name + "_save.txt");
+        String[][] data = new String[1][9];
+        data[0][0] = name;
+        data[0][1] = "" + map[0][0][0].player.health;
+        data[0][2] = "" + map[0][0][0].player.attack;
+        data[0][3] = "" + map[0][0][0].player.shield;
+        data[0][4] = "" + ligne;
+        data[0][5] = "" + colonne;
+        data[0][6] = "" + etage;
+        data[0][7] = "";
+        data[0][8] = "";
+    }
+
+    void addMonsterKillPos(int ligne, int colonne, int etage) {
+        /* Add the position of the monster killed to the save file */
+        String[] temps = new String[length(AllPosMonsterKillTab) + 1];
+        for(int i = 0; i < length(AllPosMonsterKillTab); i++) {
+            temps[i] = AllPosMonsterKillTab[i];
+        }
+        temps[length(AllPosMonsterKillTab)] = ligne + "|" + colonne + "|" + etage;
+        AllPosMonsterKillTab = temps;
+    }
+
+    void addLootTakePos(int ligne, int colonne, int etage) {
+        /* Add the position of the loot taken to the save file */
+        String[] temps = new String[length(AllPosLootTakeTab) + 1];
+        for(int i = 0; i < length(AllPosLootTakeTab); i++) {
+            temps[i] = AllPosLootTakeTab[i];
+        }
+        temps[length(AllPosLootTakeTab)] = ligne + "|" + colonne + "|" + etage;
+        AllPosLootTakeTab = temps;
+    }
+
     // Algorithm principal
 
     void algorithm() {
@@ -1317,8 +1358,6 @@ class IthyphalGame extends Program {
     //? - Faire en sorte que le jeu détecte quand le joueur va sur une porte et le fait sortir si la porte est ouverte // FAIT
     //? - Faire en sorte que quand le joueur va sur une porte ouverte, il soit téléporté sur une autre carte // FAIT
     //? - Faire en sorte que le jeu détecte le nombre de monstres et si il n'y en a plus, il ouvre la ou les porte(s) // FAIT
-
-
 
 
     //TODO Plus si j'ai le temps :)
