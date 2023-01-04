@@ -2,6 +2,13 @@ import extensions.*;
 
 class IthyphalGame extends Program {
 
+    // LOGGER
+    final boolean LOGGER = true;
+
+    // DELAY
+
+    final int DELAY = 0;
+
     // MONSTER VARIABLES
     final double ZOMBIE_SPAWN_PROBA = 0.5;
     final int ZOMBIE_ATTACK = 3;
@@ -31,6 +38,13 @@ class IthyphalGame extends Program {
     String[] AllPosMonsterKillTab = new String[0];
     String[] AllPosLootTakeTab = new String[0];
 
+    void logger(String s) {
+        if(LOGGER) {
+            print(s);
+            readString();
+        }
+    }
+
 
     Player newPlayer(String nom) {
         /* Constructor of class PLAYER */
@@ -43,9 +57,20 @@ class IthyphalGame extends Program {
         /* Test of the function newPlayer */
         Player p = newPlayer("Bob");
         assertEquals("Bob", p.nom);
-        assertEquals(5, p.attack);
-        assertEquals(50, p.healt);
+        assertEquals(3, p.attack);
+        assertEquals(20, p.healt);
         assertEquals(0, p.shield);
+    }
+
+    String toString(Player p) {
+        /* Return the string of the player */
+        return "Player: " + p.nom + " attack: " + p.attack + " healt: " + p.healt + " shield: " + p.shield;
+    }
+
+    void testToString() {
+        /* Test of the function toString */
+        Player p = newPlayer("Bob");
+        assertEquals("Player: Bob attack: 3 healt: 20 shield: 0", toString(p));
     }
 
     Loot newLoot(TypeLoot type, int amount) {
@@ -63,6 +88,17 @@ class IthyphalGame extends Program {
         assertEquals(5, l.amount);
     }
 
+    String toString(Loot l) {
+        /* Return the string of the loot */
+        return "Loot: " + l.type + " amount: " + l.amount;
+    }
+
+    void testToStringLoot() {
+        /* Test of the function toString */
+        Loot l = newLoot(TypeLoot.RING, 5);
+        assertEquals("Loot: RING amount: 5", toString(l));
+    }
+
     void addLoot(Player p, Loot l) {
         /* Add the loot to the player */
         if(l.type == TypeLoot.RING) {
@@ -77,11 +113,11 @@ class IthyphalGame extends Program {
     void testAddLoot() {
         /* Test of the function addLoot */
         Player p = newPlayer("Bob");
-        assertEquals(5, p.attack);
+        assertEquals(3, p.attack);
         Loot l = newLoot(TypeLoot.RING, 5);
         addLoot(p, l);
-        assertEquals(10, p.attack);
-        assertEquals(50, p.healt);
+        assertEquals(8, p.attack);
+        assertEquals(20, p.healt);
         assertEquals(0, p.shield);
     }
 
@@ -102,6 +138,17 @@ class IthyphalGame extends Program {
         assertEquals(50, m.healt);
     }
 
+    String toString(Monster m) {
+        /* Return the string of the monster */
+        return "Monster: " + m.type + " attack: " + m.attack + " healt: " + m.healt;
+    }
+
+    void testToStringMonster() {
+        /* Test of the function toString */
+        Monster m = newMonster(TypeMonster.ZOMBIE, 5, 50);
+        assertEquals("Monster: ZOMBIE attack: 5 healt: 50", toString(m));
+    }
+
     boolean playerAttack(Player p, Monster m) {
         /* The player attack the monster */
         m.healt -= p.attack;
@@ -118,34 +165,55 @@ class IthyphalGame extends Program {
         Monster m = newMonster(TypeMonster.ZOMBIE, 5, 50);
         assertEquals(50, m.healt);
         boolean dead = playerAttack(p, m);
-        assertEquals(45, m.healt);
+        assertEquals(47, m.healt);
         assertFalse(dead);
         dead = playerAttack(p, m);
-        assertEquals(40, m.healt);
+        assertEquals(44, m.healt);
+        assertFalse(dead);
+        dead = playerAttack(p, m);
+        assertEquals(41, m.healt);
+        assertFalse(dead);
+        dead = playerAttack(p, m);
+        assertEquals(38, m.healt);
         assertFalse(dead);
         dead = playerAttack(p, m);
         assertEquals(35, m.healt);
         assertFalse(dead);
         dead = playerAttack(p, m);
-        assertEquals(30, m.healt);
+        assertEquals(32, m.healt);
         assertFalse(dead);
         dead = playerAttack(p, m);
-        assertEquals(25, m.healt);
+        assertEquals(29, m.healt);
+        assertFalse(dead);
+        dead = playerAttack(p, m);
+        assertEquals(26, m.healt);
+        assertFalse(dead);
+        dead = playerAttack(p, m);
+        assertEquals(23, m.healt);
         assertFalse(dead);
         dead = playerAttack(p, m);
         assertEquals(20, m.healt);
         assertFalse(dead);
         dead = playerAttack(p, m);
-        assertEquals(15, m.healt);
+        assertEquals(17, m.healt);
         assertFalse(dead);
         dead = playerAttack(p, m);
-        assertEquals(10, m.healt);
+        assertEquals(14, m.healt);
+        assertFalse(dead);
+        dead = playerAttack(p, m);
+        assertEquals(11, m.healt);
+        assertFalse(dead);
+        dead = playerAttack(p, m);
+        assertEquals(8, m.healt);
         assertFalse(dead);
         dead = playerAttack(p, m);
         assertEquals(5, m.healt);
         assertFalse(dead);
         dead = playerAttack(p, m);
-        assertEquals(0, m.healt);
+        assertEquals(2, m.healt);
+        assertFalse(dead);
+        dead = playerAttack(p, m);
+        assertEquals(-1, m.healt);
         assertTrue(dead);
     }
 
@@ -163,26 +231,8 @@ class IthyphalGame extends Program {
         /* Test of the function monsterAttack */
         Player p = newPlayer("Bob");
         Monster m = newMonster(TypeMonster.ZOMBIE, 5, 50);
-        assertEquals(50, p.healt);
-        boolean dead = monsterAttack(m, p);
-        assertEquals(45, p.healt);
-        assertFalse(dead);
-        dead = monsterAttack(m, p);
-        assertEquals(40, p.healt);
-        assertFalse(dead);
-        dead = monsterAttack(m, p);
-        assertEquals(35, p.healt);
-        assertFalse(dead);
-        dead = monsterAttack(m, p);
-        assertEquals(30, p.healt);
-        assertFalse(dead);
-        dead = monsterAttack(m, p);
-        assertEquals(25, p.healt);
-        assertFalse(dead);
-        dead = monsterAttack(m, p);
         assertEquals(20, p.healt);
-        assertFalse(dead);
-        dead = monsterAttack(m, p);
+        boolean dead = monsterAttack(m, p);
         assertEquals(15, p.healt);
         assertFalse(dead);
         dead = monsterAttack(m, p);
@@ -293,8 +343,6 @@ class IthyphalGame extends Program {
         m.healt = -1;
         assertEquals("", getHealt(m));
     }
-
-    /* Maps */
 
     Cellule newCellulePlayer(Player p) {
         /* Create a new cellule with a player */
@@ -586,8 +634,6 @@ class IthyphalGame extends Program {
         }
     }
 
-    /* End */
-
     boolean canGoTo(Map map, int ligne, int colonne) {
         /* Check if the player can go to the cell (ligne, colonne) */
         if(ligne < 0 || colonne < 0 || ligne >= length(map.carte) || colonne >= length(map.carte[0])) {
@@ -719,15 +765,13 @@ class IthyphalGame extends Program {
         assertTrue(direction[1] == 2);
     }
 
-    boolean movePlayer(Map map, String direction) {
+    boolean movePlayer(Map map, String direction, int player_x, int player_y) {
         /* Move the player to the direction */
-        int ligne = map.lignePlayer;
-        int colonne = map.colonnePlayer;
-        ligne = getDirection(direction, ligne, colonne)[0];
-        colonne = getDirection(direction, ligne, colonne)[1];
+        int ligne = getDirection(direction, player_x, player_y)[0];
+        int colonne = getDirection(direction, player_x, player_y)[1];
         if(canGoTo(map, ligne, colonne)) {
-            Player player = map.carte[map.lignePlayer][map.colonnePlayer].player;
-            map.carte[map.lignePlayer][map.colonnePlayer].player = null;
+            Player player = map.carte[player_x][player_y].player;
+            map.carte[player_x][player_y].player = null;
             map.carte[ligne][colonne].player = player;
             map.lignePlayer = ligne;
             map.colonnePlayer = colonne;
@@ -777,28 +821,28 @@ class IthyphalGame extends Program {
         print("Bienvenue dans");
         for(int i = 0; i < 5; i++) {
             print(".");
-            delay(500);
+            delay(DELAY / 2);
         }
         println(ANSI_BOLD + "IthyphalGame !" + ANSI_RESET);
 
         println("Vous êtes piéger dans le donjon d'Ithyphal, vous devez trouver la sortie pour vous en échapper.");
-        delay(2000);
+        delay(DELAY * 2);
         println("Mais faites attention, vous ne serez pas seul dans ce donjon ! Des monstres sont la pour vous empêcher de sortir.");
-        delay(2000);
+        delay(DELAY * 2);
         println("Vous pouvez vous déplacer avec les touches Z, Q, S et D. Et la touche H pour afficher l'aide.");
-        delay(2000);
+        delay(DELAY * 2);
         println("Voici les différentes cases que vous pouvez ou non intérragir: ");
-        delay(2000);
+        delay(DELAY * 2);
         println("    - " + ANSI_GREEN + ANSI_BOLD + "Vert" + ANSI_RESET + " : Vous pouvez intérragir avec cette case");
-        delay(2000);
+        delay(DELAY * 2);
         println("    - " + ANSI_RED + ANSI_BOLD + "Rouge" + ANSI_RESET + " : Vous ne pouvez pas intérragir avec cette case");
-        delay(2000);
+        delay(DELAY * 2);
         println("Les monstres sont représentés par un " + ANSI_RED + ANSI_BOLD + "☠" + ANSI_RESET + "  et les portes sont représentées par un " + ANSI_BLUE + ANSI_BOLD + "▩" + ANSI_RESET + " .");
-        delay(2000);
+        delay(DELAY * 2);
         println("Des coffres sont présents dans le donjon, ils sont représentés par un " + ANSI_YELLOW + ANSI_BOLD + "☼" + ANSI_RESET + " .");
-        delay(2000);
+        delay(DELAY * 2);
         println("Les escaliers sont représentés par ▲ et ▼.");
-        delay(1000);
+        delay(DELAY);
         println("Bonne chance jeune aventurier !");
         print("Appuyez sur entrer pour continuer...");
         readString();
@@ -840,16 +884,6 @@ class IthyphalGame extends Program {
         }
         return carte;
     }
-
-    Map[][][] loadFromSave() {
-        //TODO : Load from save
-        Map[][][] carte = new Map[5][5][5];
-
-        //!Code here
-
-        return carte;
-    }
-
 
     String attack(Player p, Monster m) {
         // Return: "player" if the player lost, "monster" if the monster lost.
@@ -903,7 +937,7 @@ class IthyphalGame extends Program {
                     println("Le monstre a raté son attaque !");
                 }
             }
-            delay(1000);
+            delay(DELAY);
         }
         if(p.healt <= 0) {
             return "monster";
@@ -911,8 +945,6 @@ class IthyphalGame extends Program {
             return "player";
         }
     }
-
-    // Ask function
 
     String[][] loadQuestionFile(String filename) {
         /* Load all questions in a file and return a 2D array with all the questions */
@@ -1123,41 +1155,281 @@ class IthyphalGame extends Program {
         map[etageActu - 1][ligne][colonne].carte = nouvelleCarte;
     }
 
-    boolean saveGame(Map[][][] map, String name, int ligne, int colonne, int etage) {
+    boolean saveGame(Map[][][] map, String name, int ligne, int colonne, int etage, int player_x, int player_y) {
         /* Save the game */
         /* File format:
-            name, healt, attack, shield, player_x, player_y, etage, AllPosMonsterKill, AllPosLootTake */
-        File file = newFile("./saves/" + name + "_save.txt");
-        String[][] data = new String[1][9];
+            name, healt, attack, shield, player_x, player_y, ligne, colonne, etage, AllPosMonsterKill, AllPosLootTake
+        */
+        String[][] data = new String[1][11];
         data[0][0] = name;
-        data[0][1] = "" + map[0][0][0].player.health;
-        data[0][2] = "" + map[0][0][0].player.attack;
-        data[0][3] = "" + map[0][0][0].player.shield;
-        data[0][4] = "" + ligne;
-        data[0][5] = "" + colonne;
-        data[0][6] = "" + etage;
-        data[0][7] = "";
-        data[0][8] = "";
+        data[0][1] = "" + map[etage][ligne][colonne].carte[player_x][player_y].player.healt;
+        data[0][2] = "" + map[etage][ligne][colonne].carte[player_x][player_y].player.attack;
+        data[0][3] = "" + map[etage][ligne][colonne].carte[player_x][player_y].player.shield;
+        data[0][4] = "" + player_x;
+        data[0][5] = "" + player_y;
+        data[0][6] = "" + ligne;
+        data[0][7] = "" + colonne;
+        data[0][8] = "" + etage;
+        data[0][9] = "";
+        data[0][10] = "";
+        for(int i = 0; i < length(AllPosMonsterKillTab); i++) {
+            data[0][9] += AllPosMonsterKillTab[i] + ";";
+        }
+        for(int i = 0; i < length(AllPosLootTakeTab); i++) {
+            data[0][10] += AllPosLootTakeTab[i] + ";";
+        }
+        try {
+            saveCSV(data, "./saves/" + name + ".csv");
+            return true;
+        } catch(Exception e) {
+            println(e);
+            return false;
+        }
     }
 
-    void addMonsterKillPos(int ligne, int colonne, int etage) {
+    void addMonsterKillPos(int ligne, int colonne, int etage, int x, int y) {
         /* Add the position of the monster killed to the save file */
         String[] temps = new String[length(AllPosMonsterKillTab) + 1];
         for(int i = 0; i < length(AllPosMonsterKillTab); i++) {
             temps[i] = AllPosMonsterKillTab[i];
         }
-        temps[length(AllPosMonsterKillTab)] = ligne + "|" + colonne + "|" + etage;
+        temps[length(AllPosMonsterKillTab)] = ligne + "|" + colonne + "|" + etage + "|" + x + "|" + y;
         AllPosMonsterKillTab = temps;
     }
 
-    void addLootTakePos(int ligne, int colonne, int etage) {
+    void addLootTakePos(int ligne, int colonne, int etage, int x, int y) {
         /* Add the position of the loot taken to the save file */
         String[] temps = new String[length(AllPosLootTakeTab) + 1];
         for(int i = 0; i < length(AllPosLootTakeTab); i++) {
             temps[i] = AllPosLootTakeTab[i];
         }
-        temps[length(AllPosLootTakeTab)] = ligne + "|" + colonne + "|" + etage;
+        temps[length(AllPosLootTakeTab)] = ligne + "|" + colonne + "|" + etage + "|" + x + "|" + y;
         AllPosLootTakeTab = temps;
+    }
+
+    boolean fileInFolder(String folder, String file) {
+        /* Check if a file is in a folder */
+        String[] files = getAllFilesFromDirectory(folder);
+        for(int i = 0; i < length(files); i++) {
+            if(equals(files[i], file)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    String[] loadDataPlayer(String name) {
+        /* Load the data of the player */
+        CSVFile data = loadCSV("./saves/" + name + ".csv");
+        String[] dataPlayer = new String[11];
+        for(int i = 0; i < 11; i++) {
+            try {
+                dataPlayer[i] = getCell(data, 0, i);
+                logger("dataPlayer[" + i + "] = " + dataPlayer[i]);
+            } catch(Exception e) {
+                logger("dataPlayer[" + i + "] = null");
+                dataPlayer[i] = "";
+            }
+        }
+        return dataPlayer;
+    }
+
+    boolean stringOnlyInt(String data) {
+        /* Check if a string only contains int */
+        for(int i = 0; i < length(data); i++) {
+            if(charAt(data, i) < '0' || charAt(data, i) > '9') {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    int convertToInt(String data) {
+        /* Convert a string to an int */
+        if(!stringOnlyInt(data)) {
+            return -1;
+        }
+        int result = 0;
+        int puissance = 1;
+        for(int i = length(data) - 1; i >= 0; i--) {
+            result += (int)(charAt(data, i) - '0') * puissance;
+            puissance *= 10;
+        }
+        return result;
+    }
+
+    String[] append(String[] data, String value) {
+        /* Add a value to the end of an array */
+        String[] result = new String[length(data) + 1];
+        for(int i = 0; i < length(data); i++) {
+            result[i] = data[i];
+        }
+        result[length(data)] = value;
+        return result;
+    }
+
+    String[] split(String data, String separator) {
+        /* Split a string */
+        String[] result = new String[1];
+        int index = 0;
+        int indexResult = 0;
+        for(int i = 0; i < length(data); i++) {
+            if(charAt(data, i) == charAt(separator, 0)) {
+                boolean isSeparator = true;
+                for(int j = 0; j < length(separator); j++) {
+                    if(charAt(data, i + j) != charAt(separator, j)) {
+                        isSeparator = false;
+                    }
+                }
+                if(isSeparator) {
+                    result[indexResult] = substring(data, index, i);
+                    indexResult++;
+                    result = append(result, "");
+                    index = i + length(separator);
+                    i += length(separator) - 1;
+                }
+            }
+        }
+        result[indexResult] = substring(data, index, length(data));
+        return result;
+    }
+
+    void testSplit() {
+        /* Test the split function */
+        String[] result = split("0|0|0|4|6", "|");
+        String[] verif = new String[]{ "0", "0", "0", "4", "6" };
+        for(int i = 0; i < length(result); i++) {
+            assertArrayEquals(result, verif);
+        }
+    }
+
+    int getLigneCSV(String filename) {
+        /* Get the number of line of a csv file */
+        String[] dataPlayer = loadDataPlayer(filename);
+        return convertToInt(dataPlayer[6]);
+    }
+
+    int getColonneCSV(String filename) {
+        /* Get the number of column of a csv file */
+        String[] dataPlayer = loadDataPlayer(filename);
+        return convertToInt(dataPlayer[7]);
+    }
+
+    int getEtageCSV(String filename) {
+        /* Get the number of floor of a csv file */
+        String[] dataPlayer = loadDataPlayer(filename);
+        return convertToInt(dataPlayer[8]);
+    }
+
+    int getPlayerXCSV(String filename) {
+        /* Get the x position of the player in a csv file */
+        String[] dataPlayer = loadDataPlayer(filename);
+        return convertToInt(dataPlayer[5]);
+    }
+
+    int getPlayerYCSV(String filename) {
+        /* Get the y position of the player in a csv file */
+        String[] dataPlayer = loadDataPlayer(filename);
+        return convertToInt(dataPlayer[4]);
+    }
+
+    void loadFromSave(Map[][][] carte, String name) {
+        String[] dataPlayer = loadDataPlayer(name);
+        int ligne = getLigneCSV(name);
+        int colonne = getColonneCSV(name);
+        int etage = getEtageCSV(name);
+        int player_x = getPlayerYCSV(name);
+        int player_y = getPlayerXCSV(name);
+        carte[0][0][0].carte[0][0].player = null;
+        carte[etage][ligne][colonne].carte[player_x][player_y].player = newPlayer(name);
+        carte[etage][ligne][colonne].carte[player_x][player_y].player.healt = convertToInt(dataPlayer[1]);
+        carte[etage][ligne][colonne].carte[player_x][player_y].player.attack = convertToInt(dataPlayer[2]);
+        carte[etage][ligne][colonne].carte[player_x][player_y].player.shield = convertToInt(dataPlayer[3]);
+        String[] AllPosMonsterKill = split(dataPlayer[9], ";");
+        String[] AllPosLootTake = split(dataPlayer[10], ";");
+        for(int i = 0; i < length(AllPosMonsterKill); i++) {
+            try {
+                String[] data = split(AllPosMonsterKill[i], "|");
+                if (length(data) >= 5) {
+                    logger("Monstre en " + data[0] + " " + data[1] + " " + data[2] + " " + data[3] + " " + data[4]);
+                    int x = convertToInt(data[3]);
+                    int y = convertToInt(data[4]);
+                    carte[convertToInt(data[2])][convertToInt(data[0])][convertToInt(data[1])].carte[x][y].monster = null;
+                }
+            } catch (NumberFormatException e) {
+                println("Erreur lors de la conversion de chaîne en entier. Impossible de charger les données de sauvegarde.");
+            }
+        }
+        for(int i = 0; i < length(AllPosLootTake); i++) {
+            try {
+                String[] data = split(AllPosLootTake[i], "|");
+                if (length(data) >= 5) {
+                    logger("Loot en " + data[0] + " " + data[1] + " " + data[2] + " " + data[3] + " " + data[4]);
+                    int x = convertToInt(data[3]);
+                    int y = convertToInt(data[4]);
+                    carte[convertToInt(data[2])][convertToInt(data[0])][convertToInt(data[1])].carte[x][y].loot = null;
+                }
+            } catch (NumberFormatException e) {
+                println("Erreur lors de la conversion de chaîne en entier. Impossible de charger les données de sauvegarde.");
+            }
+        }
+        AllPosMonsterKillTab = AllPosMonsterKill;
+        AllPosLootTakeTab = AllPosLootTake;
+    }
+
+    void purgeMap(Map[][][] map) {
+        /* Check AllPosMonsterKillTab and AllPosLootTakeTab and remove the monster and loot if they are dead or taken */
+
+        logger("Purge de la map en cours...");
+        
+        logger("Suppression du joueur de base...");
+        map[0][0][0].carte[4][4].player = null;
+        logger("Suppression du joueur de base terminée !");
+
+        logger("Suppression des monstres morts... (" + length(AllPosMonsterKillTab) + " monstres à supprimer)");
+
+        for(int i = 0; i < length(AllPosMonsterKillTab); i++) {
+            String[] data = split(AllPosMonsterKillTab[i], "|");
+            if(length(data) >= 5) {
+                int etage = convertToInt(data[0]);
+                int colonne = convertToInt(data[1]);
+                int ligne = convertToInt(data[2]);
+                int x = convertToInt(data[3]);
+                int y = convertToInt(data[4]);
+                if(map[etage][ligne][colonne].carte[x][y].monster != null) {
+                    map[etage][ligne][colonne].carte[x][y].monster = null;
+                    logger("Le monstre aux coordonées (" + ligne + ":" + colonne + ":" + etage + ") x=" + x + " | y=" + y + " a été supprimé !");
+                } else {
+                    afficherMap(map[etage][ligne][colonne]);
+                    logger("Le monstre aux coordonées (" + ligne + ":" + colonne + ":" + etage + ") x=" + x + " | y=" + y + " n'a pas été supprimé !");                    
+                }
+            } else {
+                logger("Erreur lors de la suppression du monstre.");
+            }
+        }
+
+        logger("Suppression des monstres terminée !");
+        logger("Suppression des loot ... Il y a " + length(AllPosLootTakeTab) + " loot à supprimer.");
+
+        for(int i = 0; i < length(AllPosLootTakeTab); i++) {
+            String[] data = split(AllPosLootTakeTab[i], "|");
+            if(length(data) >= 5) {
+                int etage = convertToInt(data[0]);
+                int colonne = convertToInt(data[1]);
+                int ligne = convertToInt(data[2]);
+                int x = convertToInt(data[3]);
+                int y = convertToInt(data[4]);
+                if(map[etage][ligne][colonne].carte[x][y].loot != null) {
+                    map[etage][ligne][colonne].carte[x][y].loot = null;
+                    logger("Le loot aux coordonées (" + ligne + ":" + colonne + ":" + etage + ") x=" + x + " | y=" + y + " a été supprimé !");
+                } else {
+                    afficherMap(map[etage][ligne][colonne]);
+                    logger("Le monstre aux coordonées (" + ligne + ":" + colonne + ":" + etage + ") x=" + x + " | y=" + y + " n'a pas été supprimé !");                    
+                }
+            } else {
+                logger("Erreur lors de la suppression du loot. La taille du tableau est de " + length(data) + "");
+            }
+        }
     }
 
     // Algorithm principal
@@ -1168,33 +1440,51 @@ class IthyphalGame extends Program {
         int colonne = 0;
         int etage = 0;
         boolean fini = false;
+        String filename = "";
         welcomeMessage();
         int choix = menuPrincipal();
         Map[][][] carte = new Map[5][5][5];
+        carte = generateMap();
         if(choix == 1) {
-            carte = generateMap();
-        } else if(choix == 2) { // Load game
-            println("La fonctionnalité de chargement de partie n'est pas encore disponible, nous sommes désolés pour la gêne occasionnée...");
-            delay(5000);
-            //! carte = loadFromSave();
+            print(""); // Skip line
+        } else if(choix == 2) { // Load game           
+            do {
+                print("Nom d'utilisateur (ecrivait stop pour arrêter) : ");
+                filename = readString();
+                if(equals(filename, "stop")) {
+                    algorithm();
+                    return;
+                }
+            } while(!fileInFolder("./saves", filename + ".csv"));
+
+            loadFromSave(carte, filename);
+            ligne = getLigneCSV(filename);
+            colonne = getColonneCSV(filename);
+            etage = getEtageCSV(filename);
+            carte[etage][ligne][colonne].colonnePlayer = getPlayerYCSV(filename);
+            carte[etage][ligne][colonne].lignePlayer = getPlayerXCSV(filename);
+            purgeMap(carte);
         } else if(choix == 3) { // Quit game
             println("Merci d'avoir joué !");
-            delay(1000);
+            delay(DELAY);
+            return;
         } else { // Error
             println("Erreur : Veuillez entrer un nombre entre 1 et 3");
-            delay(1000);
+            delay(DELAY);
             algorithm();
+            return;
         }
 
         // Load game
         print("Chargement de la carte");
         for(int i = 0; i < 5; i++) {
             print(".");
-            delay(500);
+            delay(DELAY / 2);
         }
         
         int player_x = carte[etage][ligne][colonne].colonnePlayer;
         int player_y = carte[etage][ligne][colonne].lignePlayer;
+
         boolean changementPiece = false;
         // Start game
         while(!fini && carte[etage][ligne][colonne].carte[player_x][player_y].player.healt > 0) {
@@ -1208,22 +1498,23 @@ class IthyphalGame extends Program {
                     Monster m = carte[etage][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].monster;
                     if(m != null) {
                         println("Vous avez attaqué par un " + m.type + " !");
-                        delay(1000);
+                        delay(DELAY);
                         String winner = attack(carte[etage][ligne][colonne].carte[player_x][player_y].player, m);
                         //? Optimisable
                         if(equals(winner, "player")) {
                             println("Vous avez gagné !");
-                            delay(1000);
+                            delay(DELAY);
+                            addMonsterKillPos(ligne, colonne, etage, coordonnees_prochaine[0], coordonnees_prochaine[1]);
                             carte[etage][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].monster = null;
                         } else {
                             println("Vous avez perdu !");
-                            delay(1000);
+                            delay(DELAY);
                             carte[etage][ligne][colonne].carte[player_x][player_y].player.healt = 0;
                         }
                     } else {
                         println("Erreur : Vous avez attaqué un monstre qui n'existe pas !");
                         println("Coordonnées : " + player_x + " " + player_y + "");
-                        delay(1000);
+                        delay(DELAY);
                     }
 
                 } else if(playerGoToLoot(carte[etage][ligne][colonne], direction)) { //! A optimiser
@@ -1232,7 +1523,7 @@ class IthyphalGame extends Program {
                     if(l == null) {
                         println("Erreur : Vous avez trouvé un loot qui n'existe pas !");
                         println("Coordonnées : " + player_x + " " + player_y + "");
-                        delay(5000);
+                        delay(DELAY * 5);
                     }
 
                     TypeLoot type = l.type;
@@ -1250,48 +1541,50 @@ class IthyphalGame extends Program {
                     if(equals(choix_loot, "1")) {
                         if(askQuestion(1)) {
                             println("Vous avez pris le loot !");
-                            delay(1000);
+                            addLootTakePos(ligne, colonne, etage, coordonnees_prochaine[0], coordonnees_prochaine[1]);
+                            delay(DELAY);
                             if(type == TypeLoot.POTION) {
                                 carte[etage][ligne][colonne].carte[player_x][player_y].player.healt += amount;
                                 println("Vous avez gagné " + amount + " points de vie !");
-                                delay(1000);
+                                delay(DELAY);
                             } else if(type == TypeLoot.RING) {
                                 carte[etage][ligne][colonne].carte[player_x][player_y].player.attack += amount;
                                 println("Vous avez gagné " + amount + " points d'attaque !");
-                                delay(1000);
+                                delay(DELAY);
                             } else if(type == TypeLoot.ARMOR) {
                                 carte[etage][ligne][colonne].carte[player_x][player_y].player.shield += amount;
                                 println("Vous avez gagné " + amount + " points de défense !");
-                                delay(1000);
+                                delay(DELAY);
                             }
                         } else {
                             println("Vous avez perdu le loot !");
                             carte[etage][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].loot = null;
-                            delay(1000);
+                            delay(DELAY);
                             println("Un monstre vous a attaqué !");
-                            delay(1000);
+                            delay(DELAY);
                             Monster m = newMonsterRandom();
                             String winner = attack(carte[etage][ligne][colonne].carte[player_x][player_y].player, m);
                             //? Optimisable
                             if(equals(winner, "player")) {
+                                addMonsterKillPos(ligne, colonne, etage, coordonnees_prochaine[0], coordonnees_prochaine[1]);
                                 println("Vous avez gagné !");
-                                delay(1000);
+                                delay(DELAY);
                             } else {
                                 println("Vous avez perdu !");
-                                delay(1000);
+                                delay(DELAY);
                                 carte[etage][ligne][colonne].carte[player_x][player_y].player.healt = 0;
                             }
                         }
                     } else {
                         println("Vous avez décidé de ne pas prendre le loot ! Il a disparu !");
-                        delay(1000);
+                        delay(DELAY);
                     }
                     carte[etage][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].loot = null;
                 } else if(playerGoToDoor(carte[etage][ligne][colonne], direction)) {
                     if(carte[etage][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].canExit) {
                         //! Faire une fonction pour ça parce que la on comprend plus rien !
                         print("Vous sortez de cette salle !");
-                        delay(1000);
+                        delay(DELAY);
                         int[] nouvelleSalleCoord = getDirection(direction, ligne, colonne);
                         int[] newPos = newPlayerPos(direction, carte, ligne, colonne, etage, nouvelleSalleCoord[0], nouvelleSalleCoord[1], etage, player_x, player_y); //!AJOUTER LES ARGUMENTS !!!
                         carte[etage][ligne][colonne].carte[player_x][player_y].player = null;
@@ -1307,24 +1600,24 @@ class IthyphalGame extends Program {
                     if(carte[etage][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].canExit) {
                         if(carte[etage][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].escalierMontant) {
                             print("Vous montez les escaliers !");
-                            delay(1000);
+                            delay(DELAY);
                             monterEscalier(carte, ligne, colonne, etage, player_x, player_y);
                             etage++;
                         } else {
                             print("Vous descendez les escaliers !");
-                            delay(1000);
+                            delay(DELAY);
                             descendreEscalier(carte, ligne, colonne, etage, player_x, player_y);
                             etage--;
                         }
                     }
                 }
                 update(carte, ligne, colonne, etage);
-                if(!changementPiece && movePlayer(carte[etage][ligne][colonne], direction)) {
+                if(!changementPiece && movePlayer(carte[etage][ligne][colonne], direction, player_x, player_y)) {
                     player_x = carte[etage][ligne][colonne].lignePlayer;
                     player_y = carte[etage][ligne][colonne].colonnePlayer;
                 } else if(!changementPiece) {
                     println("Erreur : Vous ne pouvez pas aller dans cette direction !");
-                    delay(1000);
+                    delay(DELAY);
                 } else { //! Si le joueur a changé de pièce
                     changementPiece = false;
                 }
@@ -1332,23 +1625,41 @@ class IthyphalGame extends Program {
                 helpCommand();
             } else if(equals(direction, "x")) {
                 println("Vous avez quitté le jeu !");
-                delay(1000);
+                delay(DELAY);
+                String save;
+
+                do {
+                    println("Voulez-vous sauvegarder la partie ? (O/N)");
+                    save = readString();
+                } while(!equals(save, "O") && !equals(save, "N"));
+
+                if(equals(save, "O")) {
+                    println("Veuillez entrer le nom de la sauvegarde :");
+                    String name = readString();
+                    if(saveGame(carte, name, ligne, colonne, etage, player_x, player_y)) {
+                        println("La partie a été sauvegardée !");
+                        delay(DELAY);
+                    } else {
+                        println("Erreur : La partie n'a pas pu être sauvegardée !");
+                        delay(DELAY);
+                    }
+                }
                 break;
-                //TODO : Save game
             } else {
                 println("Erreur : Veuillez entrer une direction valide");
-                delay(1000);
+                delay(DELAY);
             }
         }
     }
 }
 
+
     //! Problème trouver
     //* - Aucun pour le moment
 
     //! Prochaine chose à faire
-    //? - Faire une fonction qui permet de sauvegarder la partie
-    //? - Faire une fonction qui permet de charger une partie
+    //? - Faire une fonction qui permet de sauvegarder la partie // FAIT
+    //? - Faire une fonction qui permet de charger une partie // FAIT
     
 
     //! Ce qui a été fait
