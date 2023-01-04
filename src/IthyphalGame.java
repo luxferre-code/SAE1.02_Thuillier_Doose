@@ -11,15 +11,15 @@ class IthyphalGame extends Program {
 
     // MONSTER VARIABLES
     final double ZOMBIE_SPAWN_PROBA = 0.5;
-    final int ZOMBIE_ATTACK = 3;
+    final int ZOMBIE_ATTACK = 2;
     final int ZOMBIE_HEALT = 20;
 
     final double SKELETON_SPAWN_PROBA = 0.3;
-    final int SKELETON_ATTACK = 5;
+    final int SKELETON_ATTACK = 4;
     final int SKELETON_HEALT = 15;
 
     final double VAMPIRE_SPAWN_PROBA = 0.2;
-    final int VAMPIRE_ATTACK = 7;
+    final int VAMPIRE_ATTACK = 5;
     final int VAMPIRE_HEALT = 10;
 
     // LOOT VARIABLES
@@ -995,9 +995,8 @@ class IthyphalGame extends Program {
         boolean find = false;
         while(!find) {
             rdm = (int) (1 + random() * (length(QUESTIONS) - 1));
-            println(rdm);
             if(!QUESTIONS[rdm].dejaPosee) {
-                //?QUESTIONS[rdm].dejaPosee = true;
+                QUESTIONS[rdm].dejaPosee = true;
                 return QUESTIONS[rdm];
             }
         }
@@ -1030,9 +1029,12 @@ class IthyphalGame extends Program {
             }
             println("Vous avez 60 secondes pour répondre !");
             print("Votre choix : ");
-            int choix;
+            int choix = 0;
             do {
-                choix = readInt();
+                String temps = readString();
+                if(stringOnlyInt(temps)) {
+                    choix = convertToInt(temps);
+                }
             } while(choix < 1 || choix > 4);
             if(equals(tab[choix - 1], q.bonne_rep)) {
                 println(ANSI_GREEN + ANSI_BOLD + "Bonne réponse !" + ANSI_RESET);
@@ -1178,13 +1180,9 @@ class IthyphalGame extends Program {
         for(int i = 0; i < length(AllPosLootTakeTab); i++) {
             data[0][10] += AllPosLootTakeTab[i] + ";";
         }
-        try {
-            saveCSV(data, "./saves/" + name + ".csv");
-            return true;
-        } catch(Exception e) {
-            println(e);
-            return false;
-        }
+        saveCSV(data, "./saves/" + name + ".csv");
+        return true;
+
     }
 
     void addMonsterKillPos(int ligne, int colonne, int etage, int x, int y) {
@@ -1348,29 +1346,21 @@ class IthyphalGame extends Program {
         String[] AllPosMonsterKill = split(dataPlayer[9], ";");
         String[] AllPosLootTake = split(dataPlayer[10], ";");
         for(int i = 0; i < length(AllPosMonsterKill); i++) {
-            try {
-                String[] data = split(AllPosMonsterKill[i], "|");
-                if (length(data) >= 5) {
-                    logger("Monstre en " + data[0] + " " + data[1] + " " + data[2] + " " + data[3] + " " + data[4]);
-                    int x = convertToInt(data[3]);
-                    int y = convertToInt(data[4]);
-                    carte[convertToInt(data[2])][convertToInt(data[0])][convertToInt(data[1])].carte[x][y].monster = null;
-                }
-            } catch (NumberFormatException e) {
-                println("Erreur lors de la conversion de chaîne en entier. Impossible de charger les données de sauvegarde.");
+            String[] data = split(AllPosMonsterKill[i], "|");
+            if (length(data) >= 5) {
+                logger("Monstre en " + data[0] + " " + data[1] + " " + data[2] + " " + data[3] + " " + data[4]);
+                int x = convertToInt(data[3]);
+                int y = convertToInt(data[4]);
+                carte[convertToInt(data[2])][convertToInt(data[0])][convertToInt(data[1])].carte[x][y].monster = null;
             }
         }
         for(int i = 0; i < length(AllPosLootTake); i++) {
-            try {
-                String[] data = split(AllPosLootTake[i], "|");
-                if (length(data) >= 5) {
-                    logger("Loot en " + data[0] + " " + data[1] + " " + data[2] + " " + data[3] + " " + data[4]);
-                    int x = convertToInt(data[3]);
-                    int y = convertToInt(data[4]);
-                    carte[convertToInt(data[2])][convertToInt(data[0])][convertToInt(data[1])].carte[x][y].loot = null;
-                }
-            } catch (NumberFormatException e) {
-                println("Erreur lors de la conversion de chaîne en entier. Impossible de charger les données de sauvegarde.");
+            String[] data = split(AllPosLootTake[i], "|");
+            if (length(data) >= 5) {
+                logger("Loot en " + data[0] + " " + data[1] + " " + data[2] + " " + data[3] + " " + data[4]);
+                int x = convertToInt(data[3]);
+                int y = convertToInt(data[4]);
+                carte[convertToInt(data[2])][convertToInt(data[0])][convertToInt(data[1])].carte[x][y].loot = null;
             }
         }
         AllPosMonsterKillTab = AllPosMonsterKill;
