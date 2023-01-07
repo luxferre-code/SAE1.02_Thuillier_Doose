@@ -1,6 +1,6 @@
 class Player {
     String nom;
-    int attack = 3;
-    int healt = 20;
-    int shield = 0;
+    int attack = 4;
+    int healt = 30;
+    int shield = 5;
 }

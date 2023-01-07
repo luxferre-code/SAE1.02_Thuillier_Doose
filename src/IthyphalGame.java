@@ -3,11 +3,11 @@ import extensions.*;
 class IthyphalGame extends Program {
 
     // LOGGER
-    final boolean LOGGER = true;
+    final boolean LOGGER = false;
 
     // DELAY
 
-    final int DELAY = 0;
+    final int DELAY = 1000;
 
     // MONSTER VARIABLES
     final double ZOMBIE_SPAWN_PROBA = 0.5;
@@ -1390,7 +1390,6 @@ class IthyphalGame extends Program {
                     map[etage][ligne][colonne].carte[x][y].monster = null;
                     logger("Le monstre aux coordonées (" + ligne + ":" + colonne + ":" + etage + ") x=" + x + " | y=" + y + " a été supprimé !");
                 } else {
-                    afficherMap(map[etage][ligne][colonne]);
                     logger("Le monstre aux coordonées (" + ligne + ":" + colonne + ":" + etage + ") x=" + x + " | y=" + y + " n'a pas été supprimé !");                    
                 }
             } else {
@@ -1413,7 +1412,6 @@ class IthyphalGame extends Program {
                     map[etage][ligne][colonne].carte[x][y].loot = null;
                     logger("Le loot aux coordonées (" + ligne + ":" + colonne + ":" + etage + ") x=" + x + " | y=" + y + " a été supprimé !");
                 } else {
-                    afficherMap(map[etage][ligne][colonne]);
                     logger("Le monstre aux coordonées (" + ligne + ":" + colonne + ":" + etage + ") x=" + x + " | y=" + y + " n'a pas été supprimé !");                    
                 }
             } else {
