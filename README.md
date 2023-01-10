@@ -25,3 +25,24 @@ Permet la compilation des fichiers présents dans 'src' et création des fichier
 ./run.sh IthyphalGame
 ```
 Permet le lancement du jeu
+
+# Modification possible
+## Code source
+
+Vous pouvez modifier les variables, nous vous conseillons de ne pas y toucher si vous ne savez pas ce que vous faites
+Vous pouvez modifier les **valeurs** de la ligne __6 à 34__.
+
+## Les cartes
+
+Les cartes sont sauvegardé sous un format spécifique. Qui demande une grande rigueur !
+Donc si vous voulez le modifier, merci de prendre en compte ces particularités
+
+- Les maps sont sauvegarder dans le dossier ressources/maps/mapXYZ.csv
+- X = etage | Y = ligne | Z = colonne
+- Les caractère autorisés sont W, #, E, M, L, U, D
+- W = mur | # = vide | E = sortie | M = monstre | L = coffre | U = escalier montant | D = escalier descendant
+  
+# Auteurs
+
+[Valentin Thuillier](mailto:valentin.thuillier.etu@univ-lille.fr)
+[Jules Doose](mailto:jules.doose.etu@univ-lille.fr)

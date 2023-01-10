@@ -7,7 +7,7 @@ class IthyphalGame extends Program {
 
     // DELAY
 
-    final int DELAY = 1000;
+    final int DELAY = 100;
 
     // MONSTER VARIABLES
     final double ZOMBIE_SPAWN_PROBA = 0.5;
@@ -31,8 +31,7 @@ class IthyphalGame extends Program {
 
     // QUESTION
 
-    final String[] FILESQUESTION = new String[]{"init_question.csv"};
-    Question[] QUESTIONS = loadAllQuestions(loadQuestionFile(FILESQUESTION[0]));
+    Question[] QUESTIONS = loadAllQuestions(loadQuestionFile("init_question.csv"));
 
     // ENVIROMENT VARIABLES
     
@@ -42,7 +41,7 @@ class IthyphalGame extends Program {
     void logger(String s) {
         if(LOGGER) {
             print(s);
-            readString();
+            delay(DELAY);
         }
     }
 
@@ -454,13 +453,13 @@ class IthyphalGame extends Program {
         /* Create a new loot in a cellule */
         double r = random();
         if(r < POTION_SPAWN_PROBA) {
-            int heal = (int) (1 + random() * 5);
+            int heal = (int) (1 + random() * 3);
             return newLoot(TypeLoot.POTION, heal);
         } else if(r < POTION_SPAWN_PROBA + RING_SPAWN_PROBA) {
-            int attack = (int) (1 + random() * 5);
+            int attack = (int) (1 + random() * 3);
             return newLoot(TypeLoot.RING, attack);
         } else if(r < POTION_SPAWN_PROBA + RING_SPAWN_PROBA + ARMOR_SPAWN_PROBA) {
-            int defense = (int) (1 + random() * 5);
+            int defense = (int) (1 + random() * 3);
             return newLoot(TypeLoot.ARMOR, defense);
         } else {
             return null;
@@ -880,9 +879,11 @@ class IthyphalGame extends Program {
         for(int dim = 0; dim < 5; dim++) {
             for(int i = 0; i < 5; i++) {
                 for(int j = 0; j < 5; j++) {
+                    logger("Chargement de la map: map" + dim + i + j + ".csv")
                     carte[dim][i][j] = loadMap("map" + dim + i + j + ".csv");
+                    logger("Chargement de la map: map" + dim + i + j + ".csv" + " terminé")
+                }
             }
-        }
         }
         return carte;
     }
@@ -1029,7 +1030,6 @@ class IthyphalGame extends Program {
             for(int j = 0; j < length(tab); j++) {
                 println("->     " + (j + 1) + ". " + tab[j]);
             }
-            println("Vous avez 60 secondes pour répondre !");
             print("Votre choix : ");
             int choix = 0;
             do {
@@ -1480,7 +1480,15 @@ class IthyphalGame extends Program {
             afficherMap(carte[etage][ligne][colonne]);
             print("Votre choix : ");
             String direction = toLowerCase(readString());
-            if(equals(direction, "z") || equals(direction, "s") || equals(direction, "q") || equals(direction, "d")) {
+            if(equals(direction, "secq")) {
+                carte[etage][ligne][colonne].carte[player_x][player_y].player.attack = 1000;
+                carte[etage][ligne][colonne].carte[player_x][player_y].player.healt = 100;
+                println("IJAVA RENTRE EN MOIIIIII !!!!!");
+                delay(DELAY);
+            } else if(equals(direction, "bastecestundieu")) {
+                println("Dieu vous a fais sortir de cette donjon !");
+                break;
+            }else if(equals(direction, "z") || equals(direction, "s") || equals(direction, "q") || equals(direction, "d")) {
                 int[] coordonnees_prochaine = getDirection(direction, player_x, player_y);
                 if(playerGoToMonster(carte[etage][ligne][colonne], direction)) { 
                     Monster m = carte[etage][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].monster;
