@@ -1,3 +1,3 @@
 enum TypeMonster {
-    ZOMBIE, SKELETON, VAMPIRE, BOSS
+    ZOMBIE, SKELETON, VAMPIRE
 }

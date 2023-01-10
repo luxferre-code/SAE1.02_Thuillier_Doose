@@ -35,6 +35,7 @@ class IthyphalGame extends Program {
     Question[] QUESTIONS = loadAllQuestions(loadQuestionFile(FILESQUESTION[0]));
 
     // ENVIROMENT VARIABLES
+    
     String[] AllPosMonsterKillTab = new String[0];
     String[] AllPosLootTakeTab = new String[0];
 
@@ -597,6 +598,7 @@ class IthyphalGame extends Program {
         /* Display the map */
         clearScreen();
         println();
+        println("Les touches sont: Z pour monter, Q pour aller à gauche, D pour aller à droite, S pour descendre. H pour afficher l'aide. X pour quiiter");
         for(int i = 0; i < length(map.carte); i++) {
             for(int j = 0; j < length(map.carte[0]); j++) {
                 if(map.carte[i][j].isWall) {
@@ -1420,8 +1422,6 @@ class IthyphalGame extends Program {
         }
     }
 
-    // Algorithm principal
-
     void algorithm() {
         // Main function
         int ligne = 0;
@@ -1571,9 +1571,25 @@ class IthyphalGame extends Program {
                 } else if(playerGoToDoor(carte[etage][ligne][colonne], direction)) {
                     if(carte[etage][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].canExit) {
                         //! Faire une fonction pour ça parce que la on comprend plus rien !
-                        print("Vous sortez de cette salle !");
+                        println("Vous sortez de cette salle !");
                         delay(DELAY);
                         int[] nouvelleSalleCoord = getDirection(direction, ligne, colonne);
+
+                        // Check si le player est out of bound
+                        if(nouvelleSalleCoord[0] < 0 || nouvelleSalleCoord[0] >= carte[etage].length || nouvelleSalleCoord[1] < 0 || nouvelleSalleCoord[1] >= carte[etage][0].length) {
+                            print("Bravo ! Vous êtes sorti du donjon");
+                            for(int i = 0; i < 10; i++) {
+                                print(".");
+                                delay(DELAY / 2);
+                            }
+                            println();
+                            println("Mais, ou êtes-vous arrivé ?");
+                            delay(DELAY);
+                            println("La suite, au prochaine épisode :P");
+                            carte[etage][ligne][colonne].carte[player_x][player_y].player.healt = 0;
+                            break;
+                        }
+
                         int[] newPos = newPlayerPos(direction, carte, ligne, colonne, etage, nouvelleSalleCoord[0], nouvelleSalleCoord[1], etage, player_x, player_y); //!AJOUTER LES ARGUMENTS !!!
                         carte[etage][ligne][colonne].carte[player_x][player_y].player = null;
                         player_x = newPos[0];
@@ -1646,9 +1662,7 @@ class IthyphalGame extends Program {
     //* - Aucun pour le moment
 
     //! Prochaine chose à faire
-    //? - Faire une fonction qui permet de sauvegarder la partie // FAIT
-    //? - Faire une fonction qui permet de charger une partie // FAIT
-    
+    //* - Rien à faire pour le moment    
 
     //! Ce qui a été fait
     //? - Lors de la téléportation à une autre salle, le joueur est encore en mémoire dans l'ancienne salle // FAIT
@@ -1657,6 +1671,8 @@ class IthyphalGame extends Program {
     //? - Faire en sorte que le jeu détecte quand le joueur va sur une porte et le fait sortir si la porte est ouverte // FAIT
     //? - Faire en sorte que quand le joueur va sur une porte ouverte, il soit téléporté sur une autre carte // FAIT
     //? - Faire en sorte que le jeu détecte le nombre de monstres et si il n'y en a plus, il ouvre la ou les porte(s) // FAIT
+    //? - Faire une fonction qui permet de sauvegarder la partie // FAIT
+    //? - Faire une fonction qui permet de charger une partie // FAIT
 
 
     //TODO Plus si j'ai le temps :)
