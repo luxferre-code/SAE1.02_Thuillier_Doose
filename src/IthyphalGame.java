@@ -7,7 +7,7 @@ class IthyphalGame extends Program {
 
     // DELAY
 
-    final int DELAY = 100;
+    final int DELAY = 1000;
 
     // MONSTER VARIABLES
     final double ZOMBIE_SPAWN_PROBA = 0.5;
@@ -486,15 +486,25 @@ class IthyphalGame extends Program {
         }
     }
 
+    int genereRandomNumber(int min, int max) {
+        return (int) (min + random() * (max - min));
+    }
+
+    void testGenereRandomNumber() {
+        /* Test of the function genereRandomNumber */
+        int r = genereRandomNumber(1, 10);
+        assertTrue(r >= 1 && r <= 10);
+    }
+
     Monster newMonsterRandom() {
         /* Create a new monster in a cellule */
         double r = random();
         if(r < ZOMBIE_SPAWN_PROBA) {
-            return newMonster(TypeMonster.ZOMBIE, ZOMBIE_ATTACK, ZOMBIE_HEALT);
+            return newMonster(TypeMonster.ZOMBIE, genereRandomNumber(1, ZOMBIE_ATTACK), genereRandomNumber(5, ZOMBIE_HEALT));
         } else if(r < ZOMBIE_SPAWN_PROBA + SKELETON_SPAWN_PROBA) {
-            return newMonster(TypeMonster.SKELETON, SKELETON_ATTACK, SKELETON_HEALT);
+            return newMonster(TypeMonster.SKELETON, genereRandomNumber(1, SKELETON_ATTACK), genereRandomNumber(5, SKELETON_HEALT));
         } else if(r < ZOMBIE_SPAWN_PROBA + SKELETON_SPAWN_PROBA + VAMPIRE_SPAWN_PROBA) {
-            return newMonster(TypeMonster.VAMPIRE, VAMPIRE_ATTACK, VAMPIRE_HEALT);
+            return newMonster(TypeMonster.VAMPIRE, genereRandomNumber(1, VAMPIRE_ATTACK), genereRandomNumber(5, VAMPIRE_HEALT));
         } else {
             return null;
         }
