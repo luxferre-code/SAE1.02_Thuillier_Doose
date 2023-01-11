@@ -24,10 +24,16 @@ class IthyphalGame extends Program {
 
     // LOOT VARIABLES
     final double RING_SPAWN_PROBA = 0.33;
-
+    final int MAX_LOOT_ATTACK = 2;
     final double POTION_SPAWN_PROBA = 0.33;
-
+    final int MAX_LOOT_HEALTH = 3;
     final double ARMOR_SPAWN_PROBA = 0.33;
+    final int MAX_LOOT_DEFENSE = 3;
+
+    // PLAYER VARIABLES
+    final int MAX_PLAYER_ATTACK = 15;
+    final int MAX_PLAYER_HEALTH = 30;
+    final int MAX_PLAYER_DEFENSE = 10;
 
     // QUESTION
 
@@ -101,11 +107,11 @@ class IthyphalGame extends Program {
 
     void addLoot(Player p, Loot l) {
         /* Add the loot to the player */
-        if(l.type == TypeLoot.RING) {
+        if(l.type == TypeLoot.RING && p.attack <= MAX_PLAYER_ATTACK) {
             p.attack += l.amount;
-        } else if(l.type == TypeLoot.POTION) {
+        } else if(l.type == TypeLoot.POTION && p.healt <= MAX_PLAYER_HEALTH) {
             p.healt += l.amount;
-        } else if(l.type == TypeLoot.ARMOR) {
+        } else if(l.type == TypeLoot.ARMOR && p.shield <= MAX_PLAYER_DEFENSE) {
             p.shield += l.amount;
         }
     }
@@ -453,13 +459,13 @@ class IthyphalGame extends Program {
         /* Create a new loot in a cellule */
         double r = random();
         if(r < POTION_SPAWN_PROBA) {
-            int heal = (int) (1 + random() * 3);
+            int heal = (int) (1 + random() * MAX_LOOT_HEALTH);
             return newLoot(TypeLoot.POTION, heal);
         } else if(r < POTION_SPAWN_PROBA + RING_SPAWN_PROBA) {
-            int attack = (int) (1 + random() * 3);
+            int attack = (int) (1 + random() * MAX_LOOT_ATTACK);
             return newLoot(TypeLoot.RING, attack);
         } else if(r < POTION_SPAWN_PROBA + RING_SPAWN_PROBA + ARMOR_SPAWN_PROBA) {
-            int defense = (int) (1 + random() * 3);
+            int defense = (int) (1 + random() * MAX_LOOT_DEFENSE);
             return newLoot(TypeLoot.ARMOR, defense);
         } else {
             return null;
@@ -879,9 +885,9 @@ class IthyphalGame extends Program {
         for(int dim = 0; dim < 5; dim++) {
             for(int i = 0; i < 5; i++) {
                 for(int j = 0; j < 5; j++) {
-                    logger("Chargement de la map: map" + dim + i + j + ".csv")
+                    logger("Chargement de la map: map" + dim + i + j + ".csv");
                     carte[dim][i][j] = loadMap("map" + dim + i + j + ".csv");
-                    logger("Chargement de la map: map" + dim + i + j + ".csv" + " terminé")
+                    logger("Chargement de la map: map" + dim + i + j + ".csv" + " terminé");
                 }
             }
         }

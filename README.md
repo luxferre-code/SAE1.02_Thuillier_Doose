@@ -30,7 +30,7 @@ Permet le lancement du jeu
 ## Code source
 
 Vous pouvez modifier les variables, nous vous conseillons de ne pas y toucher si vous ne savez pas ce que vous faites
-Vous pouvez modifier les **valeurs** de la ligne __6 à 34__.
+Vous pouvez modifier les **valeurs** de la ligne __6 à 40__.
 
 ## Les cartes
 
