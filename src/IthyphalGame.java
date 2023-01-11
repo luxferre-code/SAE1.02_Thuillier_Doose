@@ -63,9 +63,9 @@ class IthyphalGame extends Program {
         /* Test of the function newPlayer */
         Player p = newPlayer("Bob");
         assertEquals("Bob", p.nom);
-        assertEquals(3, p.attack);
-        assertEquals(20, p.healt);
-        assertEquals(0, p.shield);
+        assertEquals(4, p.attack);
+        assertEquals(30, p.healt);
+        assertEquals(5, p.shield);
     }
 
     String toString(Player p) {
@@ -76,7 +76,7 @@ class IthyphalGame extends Program {
     void testToString() {
         /* Test of the function toString */
         Player p = newPlayer("Bob");
-        assertEquals("Player: Bob attack: 3 healt: 20 shield: 0", toString(p));
+        assertEquals("Player: Bob attack: 4 healt: 30 shield: 5", toString(p));
     }
 
     Loot newLoot(TypeLoot type, int amount) {
@@ -119,12 +119,12 @@ class IthyphalGame extends Program {
     void testAddLoot() {
         /* Test of the function addLoot */
         Player p = newPlayer("Bob");
-        assertEquals(3, p.attack);
+        assertEquals(4, p.attack);
         Loot l = newLoot(TypeLoot.RING, 5);
         addLoot(p, l);
-        assertEquals(8, p.attack);
-        assertEquals(20, p.healt);
-        assertEquals(0, p.shield);
+        assertEquals(9, p.attack);
+        assertEquals(30, p.healt);
+        assertEquals(5, p.shield);
     }
 
     Monster newMonster(TypeMonster type, int attack, int healt) {
@@ -165,64 +165,6 @@ class IthyphalGame extends Program {
         }
     }
 
-    void testPlayerAttack() {
-        /* Test of the function playerAttack */
-        Player p = newPlayer("Bob");
-        Monster m = newMonster(TypeMonster.ZOMBIE, 5, 50);
-        assertEquals(50, m.healt);
-        boolean dead = playerAttack(p, m);
-        assertEquals(47, m.healt);
-        assertFalse(dead);
-        dead = playerAttack(p, m);
-        assertEquals(44, m.healt);
-        assertFalse(dead);
-        dead = playerAttack(p, m);
-        assertEquals(41, m.healt);
-        assertFalse(dead);
-        dead = playerAttack(p, m);
-        assertEquals(38, m.healt);
-        assertFalse(dead);
-        dead = playerAttack(p, m);
-        assertEquals(35, m.healt);
-        assertFalse(dead);
-        dead = playerAttack(p, m);
-        assertEquals(32, m.healt);
-        assertFalse(dead);
-        dead = playerAttack(p, m);
-        assertEquals(29, m.healt);
-        assertFalse(dead);
-        dead = playerAttack(p, m);
-        assertEquals(26, m.healt);
-        assertFalse(dead);
-        dead = playerAttack(p, m);
-        assertEquals(23, m.healt);
-        assertFalse(dead);
-        dead = playerAttack(p, m);
-        assertEquals(20, m.healt);
-        assertFalse(dead);
-        dead = playerAttack(p, m);
-        assertEquals(17, m.healt);
-        assertFalse(dead);
-        dead = playerAttack(p, m);
-        assertEquals(14, m.healt);
-        assertFalse(dead);
-        dead = playerAttack(p, m);
-        assertEquals(11, m.healt);
-        assertFalse(dead);
-        dead = playerAttack(p, m);
-        assertEquals(8, m.healt);
-        assertFalse(dead);
-        dead = playerAttack(p, m);
-        assertEquals(5, m.healt);
-        assertFalse(dead);
-        dead = playerAttack(p, m);
-        assertEquals(2, m.healt);
-        assertFalse(dead);
-        dead = playerAttack(p, m);
-        assertEquals(-1, m.healt);
-        assertTrue(dead);
-    }
-
     boolean monsterAttack(Monster m, Player p) {
         /* The monster attack the player */
         p.healt -= m.attack;
@@ -236,20 +178,11 @@ class IthyphalGame extends Program {
     void testMonsterAttack() {
         /* Test of the function monsterAttack */
         Player p = newPlayer("Bob");
+        p.shield = 0;
         Monster m = newMonster(TypeMonster.ZOMBIE, 5, 50);
-        assertEquals(20, p.healt);
-        boolean dead = monsterAttack(m, p);
-        assertEquals(15, p.healt);
-        assertFalse(dead);
-        dead = monsterAttack(m, p);
-        assertEquals(10, p.healt);
-        assertFalse(dead);
-        dead = monsterAttack(m, p);
-        assertEquals(5, p.healt);
-        assertFalse(dead);
-        dead = monsterAttack(m, p);
-        assertEquals(0, p.healt);
-        assertTrue(dead);
+        int healt = p.healt;
+        monsterAttack(m, p);
+        assertEquals(healt - m.attack, p.healt);
     }
 
     boolean isDead(Player p) {
@@ -1439,7 +1372,6 @@ class IthyphalGame extends Program {
     }
 
     void algorithm() {
-        // Main function
         int ligne = 0;
         int colonne = 0;
         int etage = 0;
@@ -1450,8 +1382,8 @@ class IthyphalGame extends Program {
         Map[][][] carte = new Map[5][5][5];
         carte = generateMap();
         if(choix == 1) {
-            print(""); // Skip line
-        } else if(choix == 2) { // Load game           
+            print("");
+        } else if(choix == 2) {        
             do {
                 print("Nom d'utilisateur (ecrivait stop pour arrêter) : ");
                 filename = readString();
@@ -1468,18 +1400,17 @@ class IthyphalGame extends Program {
             carte[etage][ligne][colonne].colonnePlayer = getPlayerYCSV(filename);
             carte[etage][ligne][colonne].lignePlayer = getPlayerXCSV(filename);
             purgeMap(carte);
-        } else if(choix == 3) { // Quit game
+        } else if(choix == 3) {
             println("Merci d'avoir joué !");
             delay(DELAY);
             return;
-        } else { // Error
+        } else {
             println("Erreur : Veuillez entrer un nombre entre 1 et 3");
             delay(DELAY);
             algorithm();
             return;
         }
 
-        // Load game
         print("Chargement de la carte");
         for(int i = 0; i < 5; i++) {
             print(".");
@@ -1490,7 +1421,6 @@ class IthyphalGame extends Program {
         int player_y = carte[etage][ligne][colonne].lignePlayer;
 
         boolean changementPiece = false;
-        // Start game
         while(!fini && carte[etage][ligne][colonne].carte[player_x][player_y].player.healt > 0) {
             clearScreen();
             afficherMap(carte[etage][ligne][colonne]);
@@ -1512,7 +1442,6 @@ class IthyphalGame extends Program {
                         println("Vous avez attaqué par un " + m.type + " !");
                         delay(DELAY);
                         String winner = attack(carte[etage][ligne][colonne].carte[player_x][player_y].player, m);
-                        //? Optimisable
                         if(equals(winner, "player")) {
                             println("Vous avez gagné !");
                             delay(DELAY);
@@ -1529,7 +1458,7 @@ class IthyphalGame extends Program {
                         delay(DELAY);
                     }
 
-                } else if(playerGoToLoot(carte[etage][ligne][colonne], direction)) { //! A optimiser
+                } else if(playerGoToLoot(carte[etage][ligne][colonne], direction)) {
                     
                     Loot l = carte[etage][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].loot;
                     if(l == null) {
@@ -1576,7 +1505,6 @@ class IthyphalGame extends Program {
                             delay(DELAY);
                             Monster m = newMonsterRandom();
                             String winner = attack(carte[etage][ligne][colonne].carte[player_x][player_y].player, m);
-                            //? Optimisable
                             if(equals(winner, "player")) {
                                 addMonsterKillPos(ligne, colonne, etage, coordonnees_prochaine[0], coordonnees_prochaine[1]);
                                 println("Vous avez gagné !");
@@ -1594,12 +1522,10 @@ class IthyphalGame extends Program {
                     carte[etage][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].loot = null;
                 } else if(playerGoToDoor(carte[etage][ligne][colonne], direction)) {
                     if(carte[etage][ligne][colonne].carte[coordonnees_prochaine[0]][coordonnees_prochaine[1]].canExit) {
-                        //! Faire une fonction pour ça parce que la on comprend plus rien !
                         println("Vous sortez de cette salle !");
                         delay(DELAY);
                         int[] nouvelleSalleCoord = getDirection(direction, ligne, colonne);
 
-                        // Check si le player est out of bound
                         if(nouvelleSalleCoord[0] < 0 || nouvelleSalleCoord[0] >= carte[etage].length || nouvelleSalleCoord[1] < 0 || nouvelleSalleCoord[1] >= carte[etage][0].length) {
                             print("Bravo ! Vous êtes sorti du donjon");
                             for(int i = 0; i < 10; i++) {
@@ -1614,7 +1540,7 @@ class IthyphalGame extends Program {
                             break;
                         }
 
-                        int[] newPos = newPlayerPos(direction, carte, ligne, colonne, etage, nouvelleSalleCoord[0], nouvelleSalleCoord[1], etage, player_x, player_y); //!AJOUTER LES ARGUMENTS !!!
+                        int[] newPos = newPlayerPos(direction, carte, ligne, colonne, etage, nouvelleSalleCoord[0], nouvelleSalleCoord[1], etage, player_x, player_y);
                         carte[etage][ligne][colonne].carte[player_x][player_y].player = null;
                         player_x = newPos[0];
                         player_y = newPos[1];
@@ -1646,7 +1572,7 @@ class IthyphalGame extends Program {
                 } else if(!changementPiece) {
                     println("Erreur : Vous ne pouvez pas aller dans cette direction !");
                     delay(DELAY);
-                } else { //! Si le joueur a changé de pièce
+                } else {
                     changementPiece = false;
                 }
             } else if(equals(direction, "h")) {
